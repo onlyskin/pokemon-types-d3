@@ -1,7 +1,8 @@
-import { PokemonType } from '../src/index';
 type Direction = 'from' | 'to';
 
-interface INode {
+export type PokemonType = 'normal' | 'fire' | 'fighting' | 'water' | 'flying' | 'grass' | 'poison' | 'electric' | 'ground' | 'psychic' | 'rock' | 'ice' | 'bug' | 'dragon' | 'ghost' | 'dark' | 'steel' | 'fairy';
+
+export interface INode {
     name: PokemonType;
     multiplier: number;
     direction: Direction;

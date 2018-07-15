@@ -13,3 +13,111 @@ svg {
   font-size: 30px;
   text-anchor: middle;
 }
+
+.normal {
+  fill: #8a8a59;
+  fill: linear-gradient(#a8a878, #8a8a59);
+  stroke: #79794e
+}
+
+.fire {
+  fill: #f08030;
+  fill: linear-gradient(#f08030, #dd6610);
+  stroke: #b4530d
+}
+
+.water {
+  fill: #6890f0;
+  fill: linear-gradient(#6890f0, #386ceb);
+  stroke: #1753e3
+}
+
+.electric {
+  fill: #f8d030;
+  fill: linear-gradient(#f8d030, #f0c108);
+  stroke: #c19b07
+}
+
+.grass {
+  fill: #78c850;
+  fill: linear-gradient(#78c850, #5ca935);
+  stroke: #4a892b
+}
+
+.ice {
+  fill: #98d8d8;
+  fill: linear-gradient(#98d8d8, #69c6c6);
+  stroke: #45b6b6
+}
+
+.fighting {
+  fill: #c03028;
+  fill: linear-gradient(#c03028, #9d2721);
+  stroke: #82211b
+}
+
+.poison {
+  fill: #a040a0;
+  fill: linear-gradient(#a040a0, #803380);
+  stroke: #662966
+}
+
+.ground {
+  fill: #e0c068;
+  fill: linear-gradient(#e0c068, #d4a82f);
+  stroke: #aa8623
+}
+
+.flying {
+  fill: #a890f0;
+  fill: linear-gradient(#a890f0, #9180c4);
+  stroke: #7762b6
+}
+
+.psychic {
+  fill: #f85888;
+  fill: linear-gradient(#f85888, #f61c5d);
+  stroke: #d60945
+}
+
+.bug {
+  fill: #a8b820;
+  fill: linear-gradient(#a8b820, #8d9a1b);
+  stroke: #616b13
+}
+
+.rock {
+  fill: #b8a038;
+  fill: linear-gradient(#b8a038, #93802d);
+  stroke: #746523
+}
+
+.ghost {
+  fill: #705898;
+  fill: linear-gradient(#705898, #554374);
+  stroke: #413359
+}
+
+.dragon {
+  fill: #7038f8;
+  fill: linear-gradient(#7038f8, #4c08ef);
+  stroke: #3d07c0
+}
+
+.steel {
+  fill: #b8b8d0;
+  fill: linear-gradient(#b8b8d0, #9797ba);
+  stroke: #7a7aa7
+}
+
+.dark {
+  fill: #705848;
+  fill: linear-gradient(#705848, #513f34);
+  stroke: #362a23
+}
+
+.fairy {
+  fill: #e898e8;
+  fill-image: linear-gradient(#e898e8, #de6ede);
+  stroke: #d547d5
+}
