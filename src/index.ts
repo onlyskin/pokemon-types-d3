@@ -18,7 +18,11 @@ function id<T>(x: T): T {
 const height = 400;
 const width = 400;
 
-function updateVisualisation(svg: Element, focused: PokemonType) {
+function updateVisualisation(
+    svg: Element,
+    focused: PokemonType,
+    simulation: d3.Simulation<INode, undefined>,
+) {
     const root = d3.select(svg);
 
     const updatingFocus = root
@@ -39,13 +43,19 @@ function updateVisualisation(svg: Element, focused: PokemonType) {
 
     pokedex.getTypeByName(focused)
         .then(function(response: ITypeResponse) {
-            const nodes = type_to_nodes(response);
+            const nodes: INode[] = type_to_nodes(response);
             const CIRCLE = 'circle';
+
+            simulation.nodes(nodes);
+
+            for (var i = 0, n = Math.ceil(Math.log(simulation.alphaMin()) / Math.log(1 - simulation.alphaDecay())); i < n; ++i) {
+                simulation.tick();
+            }
 
             const updatingNodes = root
                 .selectAll<Element, INode>(CIRCLE)
                 .data<INode>(nodes, d => {
-                    return `${d.name}-${d.direction}`
+                    return `${d.name}-${d.direction}`;
                 });
 
             const mergedNodes = updatingNodes
@@ -58,8 +68,8 @@ function updateVisualisation(svg: Element, focused: PokemonType) {
 
             mergedNodes
                 .attr('class', (d) => d.name)
-                .attr('cx', (d, i) => i * 10)
-                .attr('cy', (d, i) => i * 10)
+                .attr('cx', (d) => d.x)
+                .attr('cy', (d) => d.y)
                 .attr('r', (d) => d.multiplier * 10);
 
             exitingNodes
@@ -68,12 +78,15 @@ function updateVisualisation(svg: Element, focused: PokemonType) {
 
 }
 
-const Visualisation: m.Component<{focused: PokemonType}, {}> = {
-    oncreate: ({attrs: {focused}, dom}) => {
-        updateVisualisation(dom, focused);
+const Visualisation: m.Component<{
+    focused: PokemonType,
+    simulation: d3.Simulation<INode, undefined>,
+}, {}> = {
+    oncreate: ({attrs: {focused, simulation}, dom}) => {
+        updateVisualisation(dom, focused, simulation);
     },
-    onupdate: ({attrs: {focused}, dom}) => {
-        updateVisualisation(dom, focused)
+    onupdate: ({attrs: {focused, simulation}, dom}) => {
+        updateVisualisation(dom, focused, simulation)
     },
     view: ({attrs: {focused}}) => {
         return m(
@@ -90,6 +103,12 @@ const Visualisation: m.Component<{focused: PokemonType}, {}> = {
 
 const focusedType = stream<PokemonType>('fire');
 
+const simulation = d3.forceSimulation<INode>()
+    .force("collision", d3.forceCollide(d => d.multiplier * 10 + 2))
+    .force("x", d3.forceX(d => d.direction === 'from' ? 100 : 300))
+    .force("y", d3.forceY(200))
+    .stop();
+
 m.mount(document.body, {
     view: () => {
         return [
@@ -98,7 +117,10 @@ m.mount(document.body, {
                     focusedType('dragon');
                 },
             }, 'click me'),
-            m(Visualisation, {focused: focusedType()}),
+            m(Visualisation, {
+                focused: focusedType(),
+                simulation,
+            }),
         ];
     }
 });

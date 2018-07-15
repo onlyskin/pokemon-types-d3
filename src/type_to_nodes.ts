@@ -2,7 +2,7 @@ type Direction = 'from' | 'to';
 
 export type PokemonType = 'normal' | 'fire' | 'fighting' | 'water' | 'flying' | 'grass' | 'poison' | 'electric' | 'ground' | 'psychic' | 'rock' | 'ice' | 'bug' | 'dragon' | 'ghost' | 'dark' | 'steel' | 'fairy';
 
-export interface INode {
+export interface INode extends d3.SimulationNodeDatum {
     name: PokemonType;
     multiplier: number;
     direction: Direction;
