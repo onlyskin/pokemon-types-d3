@@ -15,6 +15,10 @@ function id<T>(x: T): T {
     return x;
 }
 
+function nodeRadius(node: INode): number {
+    return node.multiplier * 10;
+}
+
 const height = 400;
 const width = 400;
 
@@ -47,6 +51,7 @@ function updateVisualisation(
             const CIRCLE = 'circle';
 
             simulation.nodes(nodes);
+            simulation.alpha(1);
 
             for (var i = 0, n = Math.ceil(Math.log(simulation.alphaMin()) / Math.log(1 - simulation.alphaDecay())); i < n; ++i) {
                 simulation.tick();
@@ -70,7 +75,7 @@ function updateVisualisation(
                 .attr('class', (d) => d.name)
                 .attr('cx', (d) => d.x)
                 .attr('cy', (d) => d.y)
-                .attr('r', (d) => d.multiplier * 10);
+                .attr('r', nodeRadius);
 
             exitingNodes
                 .remove();
@@ -104,9 +109,9 @@ const Visualisation: m.Component<{
 const focusedType = stream<PokemonType>('fire');
 
 const simulation = d3.forceSimulation<INode>()
-    .force("collision", d3.forceCollide(d => d.multiplier * 10 + 2))
+    .force("collision", d3.forceCollide(d => nodeRadius(d) + 1))
     .force("x", d3.forceX(d => d.direction === 'from' ? 100 : 300))
-    .force("y", d3.forceY(200))
+    .force("y", d3.forceY(height / 2))
     .stop();
 
 m.mount(document.body, {
