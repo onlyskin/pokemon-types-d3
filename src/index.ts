@@ -21,12 +21,17 @@ function nodeRadius(node: INode): number {
 
 const height = 400;
 const width = 400;
+const Y_DEFAULT = height / 2;
+const X_DEFAULT = width / 2;
 
 function updateVisualisation(
     svg: Element,
     focused: PokemonType,
     simulation: d3.Simulation<INode, undefined>,
 ) {
+    const nodeTransition = d3.transition()
+        .duration(1000);
+
     const root = d3.select(svg);
 
     const updatingFocus = root
@@ -63,21 +68,32 @@ function updateVisualisation(
                     return `${d.name}-${d.direction}`;
                 });
 
-            const mergedNodes = updatingNodes
+            const enteringNodes = updatingNodes
                 .enter()
-                .append(CIRCLE)
+                .append(CIRCLE);
+
+            const mergedNodes = enteringNodes
                 .merge(updatingNodes);
 
             const exitingNodes = updatingNodes
                 .exit();
 
+            enteringNodes
+                .attr('cx', (d) => d.x)
+                .attr('cy', (d) => d.y)
+                .attr('r', 0);
+
             mergedNodes
                 .attr('class', (d) => d.name)
+                .transition(nodeTransition)
+                .delay(500)
                 .attr('cx', (d) => d.x)
                 .attr('cy', (d) => d.y)
                 .attr('r', nodeRadius);
 
             exitingNodes
+                .transition(nodeTransition)
+                .attr('r', 0)
                 .remove();
         });
 
@@ -111,7 +127,7 @@ const focusedType = stream<PokemonType>('fire');
 const simulation = d3.forceSimulation<INode>()
     .force("collision", d3.forceCollide(d => nodeRadius(d) + 1))
     .force("x", d3.forceX(d => d.direction === 'from' ? 100 : 300))
-    .force("y", d3.forceY(height / 2))
+    .force("y", d3.forceY(Y_DEFAULT))
     .stop();
 
 m.mount(document.body, {
