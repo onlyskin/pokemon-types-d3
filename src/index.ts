@@ -20,7 +20,7 @@ function nodeRadius(node: INode): number {
 }
 
 const HEIGHT = 600;
-const WIDTH = 600;
+const WIDTH = 500;
 
 function updateVisualisation(
     svg: Element,
