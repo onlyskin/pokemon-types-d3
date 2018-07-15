@@ -19,8 +19,8 @@ function nodeRadius(node: INode): number {
     return node.multiplier * 10;
 }
 
-const height = 400;
-const width = 400;
+const HEIGHT = 600;
+const WIDTH = 600;
 
 function updateVisualisation(
     svg: Element,
@@ -40,8 +40,8 @@ function updateVisualisation(
         .enter()
         .append('text')
         .classed('focused', true)
-        .attr('x', width / 2)
-        .attr('y', height / 2)
+        .attr('x', WIDTH / 2)
+        .attr('y', HEIGHT / 2)
         .text(id);
 
     updatingFocus
@@ -85,7 +85,6 @@ function updateVisualisation(
 
             mergedNodes
                 .transition(nodeTransition)
-                .delay(200)
                 .attr('cx', (d) => d.x)
                 .attr('cy', (d) => d.y)
                 .attr('r', nodeRadius);
@@ -114,8 +113,8 @@ const Visualisation: m.Component<{
             {
                 version: '1',
                 xmlns: 'http://www.w3.org/2000/svg',
-                height,
-                width,
+                height: HEIGHT,
+                width: WIDTH,
             },
         );
     },
@@ -130,8 +129,10 @@ function updateFocusedType(newType: PokemonType) {
 
 const simulation = d3.forceSimulation<INode>()
     .force("collision", d3.forceCollide<INode>(d => nodeRadius(d) + 1))
-    .force("x", d3.forceX<INode>(d => d.direction === 'from' ? 100 : 300))
-    .force("y", d3.forceY(height / 2))
+    .force("x", d3.forceX<INode>(d => {
+        return d.direction === 'from' ? WIDTH / 4 : 3 * WIDTH / 4;
+    }))
+    .force("y", d3.forceY(HEIGHT / 2))
     .stop();
 
 m.mount(document.body, {
