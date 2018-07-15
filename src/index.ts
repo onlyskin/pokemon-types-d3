@@ -21,8 +21,6 @@ function nodeRadius(node: INode): number {
 
 const height = 400;
 const width = 400;
-const Y_DEFAULT = height / 2;
-const X_DEFAULT = width / 2;
 
 function updateVisualisation(
     svg: Element,
@@ -30,7 +28,7 @@ function updateVisualisation(
     simulation: d3.Simulation<INode, undefined>,
 ) {
     const nodeTransition = d3.transition()
-        .duration(1000);
+        .duration(600);
 
     const root = d3.select(svg);
 
@@ -79,14 +77,15 @@ function updateVisualisation(
                 .exit();
 
             enteringNodes
+                .attr('class', (d) => d.name)
                 .attr('cx', (d) => d.x)
                 .attr('cy', (d) => d.y)
+                .on('click', (d) => updateFocusedType(d.name))
                 .attr('r', 0);
 
             mergedNodes
-                .attr('class', (d) => d.name)
                 .transition(nodeTransition)
-                .delay(500)
+                .delay(200)
                 .attr('cx', (d) => d.x)
                 .attr('cy', (d) => d.y)
                 .attr('r', nodeRadius);
@@ -124,24 +123,22 @@ const Visualisation: m.Component<{
 
 const focusedType = stream<PokemonType>('fire');
 
+function updateFocusedType(newType: PokemonType) {
+    focusedType(newType);
+    m.redraw();
+}
+
 const simulation = d3.forceSimulation<INode>()
-    .force("collision", d3.forceCollide(d => nodeRadius(d) + 1))
-    .force("x", d3.forceX(d => d.direction === 'from' ? 100 : 300))
-    .force("y", d3.forceY(Y_DEFAULT))
+    .force("collision", d3.forceCollide<INode>(d => nodeRadius(d) + 1))
+    .force("x", d3.forceX<INode>(d => d.direction === 'from' ? 100 : 300))
+    .force("y", d3.forceY(height / 2))
     .stop();
 
 m.mount(document.body, {
     view: () => {
-        return [
-            m('button', {
-                onclick: () => {
-                    focusedType('dragon');
-                },
-            }, 'click me'),
-            m(Visualisation, {
-                focused: focusedType(),
-                simulation,
-            }),
-        ];
+        return m(Visualisation, {
+            focused: focusedType(),
+            simulation,
+        });
     }
 });
