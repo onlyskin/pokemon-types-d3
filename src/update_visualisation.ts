@@ -47,7 +47,9 @@ export function updateVisualisation(
     updatingFocus
         .enter()
         .append('text')
+        .merge(updatingFocus)
         .classed('focused', true)
+        .transition(nodeTransition)
         .attr('x', width / 2)
         .attr('y', height / 2)
         .text(id);

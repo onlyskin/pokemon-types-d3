@@ -26,6 +26,10 @@ const Visualisation: m.Component<{
     },
 };
 
+window.addEventListener('resize', () => {
+    m.redraw();
+});
+
 m.mount(document.body, {
     view: () => {
         return m(Visualisation, {
