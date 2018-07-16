@@ -2,8 +2,9 @@ import * as d3 from 'd3';
 import * as m from 'mithril';
 import { Pokedex } from 'pokeapi-js-wrapper';
 import { ITypeResponse, PokemonType, INode } from './type_to_nodes';
-import { focusedType, HEIGHT, SVG_WIDTH, nodeRadius } from './utils';
+import { focusedType, nodeRadius } from './utils';
 import type_to_nodes from './type_to_nodes';
+import { tick } from './simulation';
 
 const pokedex = new Pokedex({
     protocol: 'https',
@@ -23,10 +24,19 @@ function updateFocusedType(newType: PokemonType) {
 export function updateVisualisation(
     svg: Element,
     focused: PokemonType,
-    simulation: d3.Simulation<INode, undefined>,
+    forceSimulation: (
+        height: number,
+        width: number,
+    ) => d3.Simulation<INode, undefined>,
 ) {
     const nodeTransition = d3.transition()
         .duration(600);
+
+    const boundingRect = (svg.getBoundingClientRect() as DOMRect);
+    const width = boundingRect.width;
+    const height = boundingRect.height;
+    svg.setAttribute('width', width.toString());
+    svg.setAttribute('height', height.toString());
 
     const root = d3.select(svg);
 
@@ -38,8 +48,8 @@ export function updateVisualisation(
         .enter()
         .append('text')
         .classed('focused', true)
-        .attr('x', SVG_WIDTH() / 2)
-        .attr('y', HEIGHT / 2)
+        .attr('x', width / 2)
+        .attr('y', height / 2)
         .text(id);
 
     updatingFocus
@@ -48,25 +58,20 @@ export function updateVisualisation(
 
     pokedex.getTypeByName(focused)
         .then(function(response: ITypeResponse) {
+            const simulation = forceSimulation(height, width);
             const nodes: INode[] = type_to_nodes(response);
-            const CIRCLE = 'circle';
-
             simulation.nodes(nodes);
-            simulation.alpha(1);
-
-            for (var i = 0, n = Math.ceil(Math.log(simulation.alphaMin()) / Math.log(1 - simulation.alphaDecay())); i < n; ++i) {
-                simulation.tick();
-            }
+            tick(simulation);
 
             const updatingNodes = root
-                .selectAll<Element, INode>(CIRCLE)
+                .selectAll<Element, INode>('circle')
                 .data<INode>(nodes, d => {
                     return `${d.name}-${d.direction}`;
                 });
 
             const enteringNodes = updatingNodes
                 .enter()
-                .append(CIRCLE);
+                .append('circle');
 
             const mergedNodes = enteringNodes
                 .merge(updatingNodes);
@@ -92,5 +97,4 @@ export function updateVisualisation(
                 .attr('r', 0)
                 .remove();
         });
-
 }
