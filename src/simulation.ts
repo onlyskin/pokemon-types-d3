@@ -7,7 +7,7 @@ export function forceSimulation(
     width: number,
 ): d3.Simulation<INode, undefined> {
     return d3.forceSimulation<INode>()
-        .force("collision", d3.forceCollide<INode>(d => nodeRadius(d) + 1))
+    .force("collision", d3.forceCollide<INode>(d => nodeRadius(d, width) + width * 0.005))
         .force("x", d3.forceX<INode>(d => {
             return d.direction === 'from' ? width / 4 : 3 * width / 4;
         }))

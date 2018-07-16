@@ -82,17 +82,17 @@ export function updateVisualisation(
                 .exit();
 
             enteringNodes
-                .attr('class', (d) => d.name)
-                .attr('cx', (d) => d.x)
-                .attr('cy', (d) => d.y)
-                .on('click', (d) => updateFocusedType(d.name))
+                .attr('class', d => d.name)
+                .attr('cx', d => d.x)
+                .attr('cy', d => d.y)
+                .on('click', d => updateFocusedType(d.name))
                 .attr('r', 0);
 
             mergedNodes
                 .transition(nodeTransition)
-                .attr('cx', (d) => d.x)
-                .attr('cy', (d) => d.y)
-                .attr('r', nodeRadius);
+                .attr('cx', d => d.x)
+                .attr('cy', d => d.y)
+                .attr('r', d => nodeRadius(d, width));
 
             exitingNodes
                 .transition(nodeTransition)
