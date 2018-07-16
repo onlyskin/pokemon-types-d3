@@ -2,12 +2,18 @@ import * as d3 from 'd3';
 import { INode } from './type_to_nodes';
 import { nodeRadius } from './utils';
 
+function nodePadding(svgWidth: number): number {
+    return svgWidth * 0.005;
+}
+
 export function forceSimulation(
     height: number,
     width: number,
 ): d3.Simulation<INode, undefined> {
     return d3.forceSimulation<INode>()
-    .force("collision", d3.forceCollide<INode>(d => nodeRadius(d, width) + width * 0.005))
+        .force("collision", d3.forceCollide<INode>(d => {
+            return nodeRadius(d, width) + nodePadding(width);
+        }))
         .force("x", d3.forceX<INode>(d => {
             return d.direction === 'from' ? width / 4 : 3 * width / 4;
         }))
