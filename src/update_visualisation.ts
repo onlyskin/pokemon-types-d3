@@ -48,10 +48,8 @@ export function updateVisualisation(
         height: number,
         width: number,
     ) => d3.Simulation<INode, undefined>,
+    focusedUpdated: boolean,
 ) {
-    const nodeTransition = d3.transition()
-        .duration(600);
-
     const boundingRect = (svg.getBoundingClientRect() as DOMRect);
     const width = boundingRect.width;
     const height = boundingRect.height;
@@ -69,7 +67,6 @@ export function updateVisualisation(
         .append('text')
         .merge(updatingFocus)
         .classed('focused', true)
-        .transition(nodeTransition)
         .attr('x', width / 2)
         .attr('y', height / 2)
         .text(id);
@@ -87,7 +84,6 @@ export function updateVisualisation(
         .append('text')
         .merge(updatingTitle)
         .classed('title', true)
-        .transition(nodeTransition)
         .attr('x', width / 2)
         .attr('y', height / 8)
         .text(id);
@@ -96,58 +92,63 @@ export function updateVisualisation(
         .exit()
         .remove();
 
-    pokedex.getTypeByName(focused)
-        .then(function(response: ITypeResponse) {
-            const simulation = forceSimulation(height, width);
-            const nodes: INode[] = type_to_nodes(response);
+    if (focusedUpdated) {
+        pokedex.getTypeByName(focused)
+            .then(function(response: ITypeResponse) {
+                const nodeTransition = d3.transition()
+                    .duration(600);
 
-            preloadData(nodes);
+                const simulation = forceSimulation(height, width);
+                const nodes: INode[] = type_to_nodes(response);
 
-            simulation.nodes(nodes);
-            tick(simulation);
+                preloadData(nodes);
 
-            const updatingNodes = root
-                .selectAll<Element, INode>('circle')
-                .data<INode>(nodes, d => {
-                    return `${d.name}-${d.direction}`;
-                });
+                simulation.nodes(nodes);
+                tick(simulation);
 
-            const enteringNodes = updatingNodes
-                .enter()
-                .append<Element>('circle');
+                const updatingNodes = root
+                    .selectAll<Element, INode>('circle')
+                    .data<INode>(nodes, d => {
+                        return `${d.name}-${d.direction}`;
+                    });
 
-            const mergedNodes = enteringNodes
-                .merge(updatingNodes);
+                const enteringNodes = updatingNodes
+                    .enter()
+                    .append<Element>('circle');
 
-            const exitingNodes = updatingNodes
-                .exit();
+                const mergedNodes = enteringNodes
+                    .merge(updatingNodes);
 
-            enteringNodes
-                .attr('class', d => d.name)
-                .attr('cx', d => d.x)
-                .attr('cy', d => d.y)
-                .on('click', function(d) {
-                    if (focusedType() === d.name) {
-                        return;
-                    }
+                const exitingNodes = updatingNodes
+                    .exit();
 
-                    updateFocusedType(d.name);
-                    updateHoveredNode(undefined);
-                    this.dispatchEvent(new Event('mouseout'));
-                })
-                .on('mouseover', d => updateHoveredNode(d))
-                .on('mouseout', d => updateHoveredNode(undefined))
-                .attr('r', 0);
+                enteringNodes
+                    .attr('class', d => d.name)
+                    .attr('cx', d => d.x)
+                    .attr('cy', d => d.y)
+                    .on('click', function(d) {
+                        if (focusedType() === d.name) {
+                            return;
+                        }
 
-            mergedNodes
-                .transition(nodeTransition)
-                .attr('cx', d => d.x)
-                .attr('cy', d => d.y)
-                .attr('r', d => nodeRadius(d, width));
+                        updateFocusedType(d.name);
+                        updateHoveredNode(undefined);
+                        this.dispatchEvent(new Event('mouseout'));
+                    })
+                    .on('mouseover', d => updateHoveredNode(d))
+                    .on('mouseout', d => updateHoveredNode(undefined))
+                    .attr('r', 0);
 
-            exitingNodes
-                .transition(nodeTransition)
-                .attr('r', 0)
-                .remove();
-        });
+                mergedNodes
+                    .transition(nodeTransition)
+                    .attr('cx', d => d.x)
+                    .attr('cy', d => d.y)
+                    .attr('r', d => nodeRadius(d, width));
+
+                exitingNodes
+                    .transition(nodeTransition)
+                    .attr('r', 0)
+                    .remove();
+            });
+    }
 }

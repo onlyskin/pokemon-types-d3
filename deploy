@@ -1,0 +1,1 @@
+aws s3 sync out s3://poketypes.szreter.co.uk --region eu-west-2 --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --exclude '*/.DS_Store' --exclude '.git/*'  --exclude 'src/*' --exclude 'spec/*'

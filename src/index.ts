@@ -9,12 +9,17 @@ const Visualisation: m.Component<{
     focused: PokemonType,
     title: string,
     forceSimulation: (height: number, width: number) => d3.Simulation<INode, undefined>,
-}, {}> = {
+}, {
+    oldFocused: PokemonType,
+}> = {
     oncreate: ({attrs: {focused, title, forceSimulation}, dom}) => {
-        updateVisualisation(dom, focused, title, forceSimulation);
+        updateVisualisation(dom, focused, title, forceSimulation, true);
+        this.oldFocused = focused;
     },
     onupdate: ({attrs: {focused, title, forceSimulation}, dom}) => {
-        updateVisualisation(dom, focused, title, forceSimulation)
+        const focusedUpdated = focused !== this.oldFocused;
+        updateVisualisation(dom, focused, title, forceSimulation, focusedUpdated);
+        this.oldFocused = focused;
     },
     view: ({attrs: {focused}}) => {
         return m(
