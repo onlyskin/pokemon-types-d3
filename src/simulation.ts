@@ -10,13 +10,17 @@ export function forceSimulation(
     height: number,
     width: number,
 ): d3.Simulation<INode, undefined> {
+    const collisionForce = d3.forceCollide<INode>(d => {
+        return nodeRadius(d, width) + nodePadding(width);
+    });
+
+    const xForce = d3.forceX<INode>(d => {
+        return d.direction === 'from' ? width / 4 : 3 * width / 4;
+    }).strength(0.3);
+
     return d3.forceSimulation<INode>()
-        .force("collision", d3.forceCollide<INode>(d => {
-            return nodeRadius(d, width) + nodePadding(width);
-        }))
-        .force("x", d3.forceX<INode>(d => {
-            return d.direction === 'from' ? width / 4 : 3 * width / 4;
-        }))
+        .force("collision", collisionForce)
+        .force("x", xForce)
         .force("y", d3.forceY(height / 2))
         .stop();
 }

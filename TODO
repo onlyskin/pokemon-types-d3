@@ -1,5 +1,17 @@
+to share:
+- put in an s3 bucket and on own dowmain
+- add arrow at the top (inside svg) (?)
+- make bubbles hover
+- potentially add a title
+
 - make no damage ones show up
 
 nice to have:
-- first letter of type in bubble
 - optionally also add 1x type bubbles
+- add left to right arrow at the top
+
+further extensions:
+- for individual pokemon
+    - defensive on the left
+    - if more than one type, offensive on the right
+
