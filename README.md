@@ -9,3 +9,6 @@ Test:
 
 Development:
 `serveit -s out "./build.sh"` –  (`brew install serveit`)
+
+Deploying: (requires aws credentials)
+`./deploy`
