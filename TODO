@@ -1,17 +1,11 @@
 to share:
-- put in an s3 bucket and on own dowmain
-- add arrow at the top (inside svg) (?)
-- make bubbles hover
-- potentially add a title
-
+- add text at the top that appears on rollover saying 'water has 0.5x effect against fire', etc.
 - make no damage ones show up
 
 nice to have:
-- optionally also add 1x type bubbles
-- add left to right arrow at the top
+- optionally also add 1x type bubbles (toggleable)
 
 further extensions:
 - for individual pokemon
     - defensive on the left
     - if more than one type, offensive on the right
-
