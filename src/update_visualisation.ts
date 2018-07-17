@@ -118,7 +118,11 @@ export function updateVisualisation(
                 .attr('class', d => d.name)
                 .attr('cx', d => d.x)
                 .attr('cy', d => d.y)
-                .on('click', d => updateFocusedType(d.name))
+                .on('click', d => {
+                    updateFocusedType(d.name);
+                    updateHoveredNode(undefined);
+                    this.dispatch('mouseout');
+                })
                 .on('mouseover', d => updateHoveredNode(d))
                 .on('mouseout', d => updateHoveredNode(undefined))
                 .attr('r', 0);
