@@ -21,6 +21,12 @@ function updateFocusedType(newType: PokemonType) {
     m.redraw();
 }
 
+function preloadData(nodes): void {
+    nodes.map((node) => {
+        pokedex.getTypeByName(node.name);
+    });
+}
+
 export function updateVisualisation(
     svg: Element,
     focused: PokemonType,
@@ -62,6 +68,9 @@ export function updateVisualisation(
         .then(function(response: ITypeResponse) {
             const simulation = forceSimulation(height, width);
             const nodes: INode[] = type_to_nodes(response);
+
+            preloadData(nodes);
+
             simulation.nodes(nodes);
             tick(simulation);
 
