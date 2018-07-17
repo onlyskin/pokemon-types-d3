@@ -17,11 +17,19 @@ function id<T>(x: T): T {
 }
 
 function updateFocusedType(newType: PokemonType) {
+    if (newType === focusedType()) {
+        return;
+    }
+
     focusedType(newType);
     m.redraw();
 }
 
 function updateHoveredNode(newNode?: INode) {
+    if (newNode === hoveredNode()) {
+        return;
+    }
+
     hoveredNode(newNode);
     m.redraw();
 }
@@ -106,7 +114,7 @@ export function updateVisualisation(
 
             const enteringNodes = updatingNodes
                 .enter()
-                .append('circle');
+                .append<Element>('circle');
 
             const mergedNodes = enteringNodes
                 .merge(updatingNodes);
@@ -118,10 +126,14 @@ export function updateVisualisation(
                 .attr('class', d => d.name)
                 .attr('cx', d => d.x)
                 .attr('cy', d => d.y)
-                .on('click', d => {
+                .on('click', function(d) {
+                    if (focusedType() === d.name) {
+                        return;
+                    }
+
                     updateFocusedType(d.name);
                     updateHoveredNode(undefined);
-                    this.dispatch('mouseout');
+                    this.dispatchEvent(new Event('mouseout'));
                 })
                 .on('mouseover', d => updateHoveredNode(d))
                 .on('mouseout', d => updateHoveredNode(undefined))
