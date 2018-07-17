@@ -2,7 +2,7 @@ import * as d3 from 'd3';
 import * as m from 'mithril';
 import { Pokedex } from 'pokeapi-js-wrapper';
 import { ITypeResponse, PokemonType, INode } from './type_to_nodes';
-import { focusedType, nodeRadius } from './utils';
+import { focusedType, hoveredNode, nodeRadius } from './utils';
 import type_to_nodes from './type_to_nodes';
 import { tick } from './simulation';
 
@@ -21,7 +21,12 @@ function updateFocusedType(newType: PokemonType) {
     m.redraw();
 }
 
-function preloadData(nodes): void {
+function updateHoveredNode(newNode?: INode) {
+    hoveredNode(newNode);
+    m.redraw();
+}
+
+function preloadData(nodes: INode[]): void {
     nodes.map((node) => {
         pokedex.getTypeByName(node.name);
     });
@@ -30,6 +35,7 @@ function preloadData(nodes): void {
 export function updateVisualisation(
     svg: Element,
     focused: PokemonType,
+    title: string,
     forceSimulation: (
         height: number,
         width: number,
@@ -64,6 +70,24 @@ export function updateVisualisation(
         .exit()
         .remove();
 
+    const updatingTitle = root
+        .selectAll('.title')
+        .data<string>([title], d => (d as string));
+
+    updatingTitle
+        .enter()
+        .append('text')
+        .merge(updatingTitle)
+        .classed('title', true)
+        .transition(nodeTransition)
+        .attr('x', width / 2)
+        .attr('y', height / 8)
+        .text(id);
+
+    updatingTitle
+        .exit()
+        .remove();
+
     pokedex.getTypeByName(focused)
         .then(function(response: ITypeResponse) {
             const simulation = forceSimulation(height, width);
@@ -95,6 +119,8 @@ export function updateVisualisation(
                 .attr('cx', d => d.x)
                 .attr('cy', d => d.y)
                 .on('click', d => updateFocusedType(d.name))
+                .on('mouseover', d => updateHoveredNode(d))
+                .on('mouseout', d => updateHoveredNode(undefined))
                 .attr('r', 0);
 
             mergedNodes

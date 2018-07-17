@@ -16,6 +16,14 @@ svg circle:hover {
   user-select: none;
 }
 
+.title {
+  font-family: 'Open Sans Condensed', sans-serif;
+  font-size: 4vw;
+  text-anchor: middle;
+  alignment-baseline: middle;
+  user-select: none;
+}
+
 .normal {
   fill: #8a8a59;
   fill: linear-gradient(#a8a878, #8a8a59);

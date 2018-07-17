@@ -6,3 +6,24 @@ export function nodeRadius(node: INode, svgWidth: number): number {
 }
 
 export const focusedType = stream<PokemonType>('fire');
+
+export const hoveredNode = stream<INode | undefined>(undefined);
+
+export function visualisationTitle(hovered: INode, focused: PokemonType): string {
+    if (hovered === undefined) {
+        return '';
+    }
+
+    let attacking;
+    let defending;
+
+    if (hovered.direction === 'from') {
+        attacking = hovered.name;
+        defending = focused;
+    } else {
+        attacking = focused;
+        defending = hovered.name;
+    }
+
+    return `${attacking} gets ${hovered.multiplier}x against ${defending}`;
+}
