@@ -21,6 +21,7 @@ export function forceSimulation(
     return d3.forceSimulation<INode>()
         .force("collision", collisionForce)
         .force("x", xForce)
+        .force("antiCenter", d3.forceX<INode>(width / 2).strength(-0.03))
         .force("y", d3.forceY(height / 2))
         .stop();
 }

@@ -4,11 +4,16 @@ svg {
   border: 1px solid black;
 }
 
+svg circle:hover {
+  stroke-width: 3px;
+}
+
 .focused {
   font-family: 'Open Sans Condensed', sans-serif;
   font-size: 10vw;
   text-anchor: middle;
   alignment-baseline: middle;
+  user-select: none;
 }
 
 .normal {
