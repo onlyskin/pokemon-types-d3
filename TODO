@@ -1,9 +1,10 @@
-to share:
-- add text at the top that appears on rollover saying 'water has 0.5x effect against fire', etc.
+- fix window resizing bug (caused by only updating nodes if the type has changed)
 - make no damage ones show up
 
 nice to have:
 - optionally also add 1x type bubbles (toggleable)
+    - Just supply as nodes to the visualisation <- the forceSimulation factory function
+        should know whether 1x is included or not
 
 further extensions:
 - for individual pokemon
