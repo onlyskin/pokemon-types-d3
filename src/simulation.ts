@@ -1,17 +1,22 @@
 import * as d3 from 'd3';
 import { INode } from './type_to_nodes';
-import { nodeRadius } from './utils';
+import { boundingDimensions, boundingWidth } from './utils';
 
-function nodePadding(svgWidth: number): number {
-    return svgWidth * 0.005;
+function nodePadding(svg: Element): number {
+    return boundingWidth(svg) * 0.005;
+}
+
+export function nodeRadius(node: INode, svg: Element): number {
+    return node.multiplier * boundingWidth(svg) * 0.03;
 }
 
 export function forceSimulation(
-    height: number,
-    width: number,
+    svg: Element
 ): d3.Simulation<INode, undefined> {
+    const { height, width } = boundingDimensions(svg);
+
     const collisionForce = d3.forceCollide<INode>(d => {
-        return nodeRadius(d, width) + nodePadding(width);
+        return nodeRadius(d, svg) + nodePadding(svg);
     });
 
     const xForce = d3.forceX<INode>(d => {

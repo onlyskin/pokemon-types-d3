@@ -1,13 +1,39 @@
 import * as stream from 'mithril/stream';
+import * as m from 'mithril';
 import { PokemonType, INode } from './type_to_nodes';
-
-export function nodeRadius(node: INode, svgWidth: number): number {
-    return node.multiplier * svgWidth * 0.03;
-}
 
 export const focusedType = stream<PokemonType>('fire');
 
 export const hoveredNode = stream<INode | undefined>(undefined);
+
+export function updateFocusedType(newType: PokemonType) {
+    if (newType === focusedType()) {
+        return;
+    }
+
+    focusedType(newType);
+    m.redraw();
+}
+
+export function updateHoveredNode(newNode?: INode) {
+    if (newNode === hoveredNode()) {
+        return;
+    }
+
+    hoveredNode(newNode);
+    m.redraw();
+}
+
+export function boundingDimensions(svg: Element) {
+    const boundingRect = (svg.getBoundingClientRect() as DOMRect);
+    const width = boundingRect.width;
+    const height = boundingRect.height;
+    return { width, height };
+}
+
+export function boundingWidth(svg: Element) {
+    return boundingDimensions(svg).width;
+}
 
 export function visualisationTitle(hovered: INode, focused: PokemonType): string {
     if (hovered === undefined) {

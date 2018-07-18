@@ -8,7 +8,7 @@ import { forceSimulation } from './simulation';
 const Visualisation: m.Component<{
     focused: PokemonType,
     title: string,
-    forceSimulation: (height: number, width: number) => d3.Simulation<INode, undefined>,
+    forceSimulation: (svg: Element) => d3.Simulation<INode, undefined>,
 }, {
     oldFocused: PokemonType,
 }> = {
