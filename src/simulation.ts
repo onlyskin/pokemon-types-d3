@@ -2,12 +2,19 @@ import * as d3 from 'd3';
 import { INode } from './type_to_nodes';
 import { boundingDimensions, boundingWidth } from './utils';
 
+const NODE_SIZE_FACTOR = 0.03;
+const NODE_SPACING_FACTOR = 0.005;
+const CENTRE_REPULSION = -0.03;
+const X_STRENGTH = 0.3;
+const HALF = 0.5;
+
 function nodePadding(svg: Element): number {
-    return boundingWidth(svg) * 0.005;
+    return boundingWidth(svg) * NODE_SPACING_FACTOR;
 }
 
 export function nodeRadius(node: INode, svg: Element): number {
-    return node.multiplier * boundingWidth(svg) * 0.03;
+    const radiusScale = node.multiplier === 0 ? 1 : node.multiplier;
+    return radiusScale * boundingWidth(svg) * NODE_SIZE_FACTOR;
 }
 
 export function forceSimulation(
@@ -21,13 +28,13 @@ export function forceSimulation(
 
     const xForce = d3.forceX<INode>(d => {
         return d.direction === 'from' ? width / 4 : 3 * width / 4;
-    }).strength(0.3);
+    }).strength(X_STRENGTH);
 
     return d3.forceSimulation<INode>()
         .force("collision", collisionForce)
         .force("x", xForce)
-        .force("antiCenter", d3.forceX<INode>(width / 2).strength(-0.03))
-        .force("y", d3.forceY(height / 2))
+        .force("antiCenter", d3.forceX<INode>(width * HALF).strength(CENTRE_REPULSION))
+        .force("y", d3.forceY(height * HALF))
         .stop();
 }
 
