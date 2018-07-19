@@ -18,7 +18,7 @@ o.spec('calculate node radius', () => {
 
         const radius = nodeRadius(node, svgStub);
 
-        o(radius).equals(0.03 * 0.5 * 100);
+        o(radius).equals(1.5);
     });
 
     o('returns scaled svg bounding width times 2', () => {
@@ -33,7 +33,7 @@ o.spec('calculate node radius', () => {
 
         const radius = nodeRadius(node, svgStub);
 
-        o(radius).equals(0.03 * 2 * 100);
+        o(radius).equals(6);
     });
 
     o('returns scaled svg bounding width times 1', () => {
@@ -48,6 +48,6 @@ o.spec('calculate node radius', () => {
 
         const radius = nodeRadius(node, svgStub);
 
-        o(radius).equals(0.03 * 1 * 100);
+        o(radius).equals(0.3);
     });
 });

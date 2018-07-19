@@ -13,7 +13,7 @@ function nodePadding(svg: Element): number {
 }
 
 export function nodeRadius(node: INode, svg: Element): number {
-    const radiusScale = node.multiplier === 0 ? 1 : node.multiplier;
+    const radiusScale = node.multiplier === 0 ? 0.1 : node.multiplier;
     return radiusScale * boundingWidth(svg) * NODE_SIZE_FACTOR;
 }
 

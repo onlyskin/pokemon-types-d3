@@ -23,10 +23,6 @@ svg circle:hover {
   user-select: none;
 }
 
-.transparent {
-  opacity: 0.3;
-}
-
 .normal {
   fill: #8a8a59;
   fill: linear-gradient(#a8a878, #8a8a59);

@@ -124,7 +124,6 @@ function updateCircles(svg: Element, simulation: d3.Simulation<INode, undefined>
         .attr('r', 0);
 
     mergedNodes
-        .classed('transparent', d => d.multiplier === 0)
         .transition(nodeTransition)
         .attr('cx', d => d.x)
         .attr('cy', d => d.y)
