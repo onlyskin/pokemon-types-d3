@@ -1,16 +1,32 @@
-Live site: http://poketypes.szreter.co.uk/
+An interactive visualisation showing damage multipliers between different Pokemon
+Types. Hover over a coloured type bubble to see details of the multiplier, click
+on a bubble to change the focused type.
 
-Install:
+Technologies: `TypeScript`, `d3.js`, `mithril.js`
+
+See the visualisation at: http://poketypes.szreter.co.uk/
+
+
+#### Development:
+
+##### Install:
+
 `yarn`
 
-Build:
-`./build.sh`
+##### Build, serve, and watch:
 
-Test:
-`./test.sh`
-
-Development:
 `serveit -s out "./build.sh"` –  (`brew install serveit`)
 
-Deploying: (requires aws credentials)
+##### Test:
+`./test.sh`
+
+#### Deploying:
+
+##### Build:
+
+`./build.sh`
+
+##### Deploy:
+
+To deploy: (requires aws credentials)
 `./deploy`
