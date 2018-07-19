@@ -7,26 +7,25 @@ Technologies: `TypeScript`, `d3.js`, `mithril.js`
 See the visualisation at: http://poketypes.szreter.co.uk/
 
 
-#### Development:
+### Developing:
 
-##### Install:
+#### Install:
 
 `yarn`
 
-##### Build, serve, and watch:
+#### Build, serve, and watch:
 
 `serveit -s out "./build.sh"` –  (`brew install serveit`)
 
-##### Test:
+#### Test:
 `./test.sh`
 
-#### Deploying:
+### Deploying:
 
-##### Build:
+#### Build:
 
 `./build.sh`
 
-##### Deploy:
+#### Deploy:
 
-To deploy: (requires aws credentials)
-`./deploy`
+`./deploy` (requires aws credentials)
