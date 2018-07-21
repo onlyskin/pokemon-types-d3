@@ -6,6 +6,7 @@ const NODE_SIZE_FACTOR = 0.03;
 const NODE_SPACING_FACTOR = 0.005;
 const CENTRE_REPULSION = -0.03;
 const X_STRENGTH = 0.3;
+const Y_STRENGTH = 0.3;
 const HALF = 0.5;
 
 function nodePadding(svg: Element): number {
@@ -27,14 +28,18 @@ export function forceSimulation(
     });
 
     const xForce = d3.forceX<INode>(d => {
-        return d.direction === 'from' ? width / 4 : 3 * width / 4;
+        return d.direction === 'from' ? width * 0.25 : width * 0.75;
     }).strength(X_STRENGTH);
+
+    const yForce = d3.forceY<INode>( d => {
+        return d.multiplier === 1 ? height * 0.6 : height * 0.4;
+    }).strength(Y_STRENGTH);
 
     return d3.forceSimulation<INode>()
         .force("collision", collisionForce)
         .force("x", xForce)
         .force("antiCenter", d3.forceX<INode>(width * HALF).strength(CENTRE_REPULSION))
-        .force("y", d3.forceY(height * HALF))
+        .force("y", yForce)
         .stop();
 }
 
