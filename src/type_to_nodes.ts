@@ -1,6 +1,15 @@
 type Direction = 'from' | 'to';
 
-export type PokemonType = 'normal' | 'fire' | 'fighting' | 'water' | 'flying' | 'grass' | 'poison' | 'electric' | 'ground' | 'psychic' | 'rock' | 'ice' | 'bug' | 'dragon' | 'ghost' | 'dark' | 'steel' | 'fairy';
+export type PokemonType = 'normal' | 'fighting' | 'flying' |
+    'poison' | 'ground' | 'rock' | 'bug' | 'ghost' | 'steel' |
+    'fire' | 'water' | 'grass' | 'electric' | 'psychic' | 'ice' |
+    'dragon' | 'dark' | 'fairy';
+
+const pokemonTypes: PokemonType[] = [
+    'normal', 'fighting', 'flying', 'poison', 'ground', 'rock',
+    'bug', 'ghost', 'steel', 'fire', 'water', 'grass',
+    'electric', 'psychic', 'ice', 'dragon', 'dark', 'fairy',
+];
 
 export interface INode extends d3.SimulationNodeDatum {
     name: PokemonType;
@@ -26,7 +35,7 @@ export interface ITypeResponse {
 }
 
 export default (response: ITypeResponse): INode[] => {
-    const x = [
+    const multipliers = [
         { key: 'half_damage_from', multiplier: 0.5, direction: 'from' },
         { key: 'no_damage_from', multiplier: 0, direction: 'from' },
         { key: 'half_damage_to', multiplier: 0.5, direction: 'to' },
@@ -35,15 +44,44 @@ export default (response: ITypeResponse): INode[] => {
         { key: 'double_damage_to', multiplier: 2, direction: 'to' },
     ] as any[];
 
-    return x.reduce((acc, curr) => {
-        const nodes: INode[] = response.damage_relations[curr.key].map((relation) => {
-            return {
-                name: relation.name,
-                multiplier: curr.multiplier,
-                direction: curr.direction as Direction,
-            };
+    const someNodes: INode[] = multipliers.reduce((acc, curr) => {
+        const damageRelations = response.damage_relations[curr.key];
+        const nodes: INode[] = damageRelations.map((relation) => {
+            return node(
+                relation.name,
+                curr.multiplier,
+                curr.direction
+            );
         });
 
         return acc.concat(nodes);
     }, []);
+
+    const allNodes: INode[] = pokemonTypes.reduce((acc, curr) => {
+        const missingTypeNodes: INode[] = [];
+
+        if (!someNodes.find(n => {
+            return n.name === curr && n.direction === 'from';
+        })) {
+            missingTypeNodes.push(node(curr, 1, 'from'));
+        }
+
+        if (!someNodes.find(n => {
+            return n.name === curr && n.direction === 'to';
+        })) {
+            missingTypeNodes.push(node(curr, 1, 'to'));
+        }
+
+        return acc.concat(missingTypeNodes);
+    }, someNodes);
+
+    return allNodes;
+}
+
+function node(
+    name: PokemonType,
+    multiplier: number,
+    direction: Direction,
+) {
+    return { name, multiplier, direction };
 }

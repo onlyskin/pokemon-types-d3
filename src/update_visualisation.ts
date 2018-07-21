@@ -37,6 +37,12 @@ export async function updateVisualisation(
     updateFocused(svg, focused);
     updateTitle(svg, title);
 
+    // const allPokemon = await pokedex.getPokemonsList();
+    // console.log(allPokemon);
+
+    // const allTypes = await pokedex.getTypesList();
+    // console.log(allTypes);
+
     if (focusedUpdated) {
         const response = await pokedex.getTypeByName(focused);
         const nodes: INode[] = type_to_nodes(response);
