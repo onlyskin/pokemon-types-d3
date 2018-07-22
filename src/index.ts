@@ -1,17 +1,17 @@
 import * as m from 'mithril';
 import * as d3 from 'd3';
-import { PokemonType, INode } from './type_to_nodes';
+import { INode } from './type_to_nodes';
 import { updateVisualisation } from './update_visualisation';
-import { focusedType, hoveredNode, visualisationTitle } from './utils';
+import { focusedPokemon, hoveredNode, visualisationTitle } from './utils';
 import { forceSimulation } from './simulation';
 import { pokemonList, initPokemonList, PokemonInput } from './pokemon_input';
 
 const Visualisation: m.Component<{
-    focused: PokemonType,
+    focused: string,
     title: string,
     forceSimulation: (svg: Element) => d3.Simulation<INode, undefined>,
 }, {
-    oldFocused: PokemonType,
+    oldFocused: string,
 }> = {
     oncreate: ({attrs: {focused, title, forceSimulation}, dom}) => {
         updateVisualisation(dom, focused, title, forceSimulation, true);
@@ -44,13 +44,13 @@ m.mount(document.body, {
         return [
             m(PokemonInput, {pokemon: pokemonList()}),
             m(Visualisation, {
-                focused: focusedType(),
+                focused: focusedPokemon(),
                 title: visualisationTitle(
                     hoveredNode(),
-                    focusedType(),
+                    focusedPokemon(),
                 ),
                 forceSimulation,
             }),
         ];
-    }
+    },
 });

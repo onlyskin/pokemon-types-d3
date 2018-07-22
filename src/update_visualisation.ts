@@ -1,29 +1,25 @@
 import * as d3 from 'd3';
 import { Pokedex } from 'pokeapi-js-wrapper';
-import { PokemonType, INode } from './type_to_nodes';
+import { INode } from './type_to_nodes';
 import { boundingDimensions, focusedType, updateFocusedType, updateHoveredNode } from './utils';
-import type_to_nodes from './type_to_nodes';
 import { tick, nodeRadius } from './simulation';
+import { ITypeResponse } from './type_to_nodes';
+import { pokemonToTypes } from './pokemon_to_nodes';
+import pokemonTypesToNodes from './pokemon_to_nodes';
 
 const pokedex = new Pokedex({
     protocol: 'https',
     cache: true,
-    timeout: 5 * 1000,
+    timeout: 10 * 1000,
 });
 
 function id<T>(x: T): T {
     return x;
 }
 
-function preloadData(nodes: INode[]): void {
-    nodes.map((node) => {
-        pokedex.getTypeByName(node.name);
-    });
-}
-
 export async function updateVisualisation(
     svg: Element,
-    focused: PokemonType,
+    focused: string,
     title: string,
     forceSimulation: (
         svg: Element
@@ -38,9 +34,11 @@ export async function updateVisualisation(
     updateTitle(svg, title);
 
     if (focusedUpdated) {
-        const response = await pokedex.getTypeByName(focused);
-        const nodes: INode[] = type_to_nodes(response);
-        preloadData(nodes);
+        const response = await pokedex.getPokemonByName(focused);
+        const types = await pokemonToTypes(response);
+        updateFocusedTypes(svg, types);
+
+        const nodes = pokemonTypesToNodes(types);
 
         const simulation = forceSimulation(svg);
         simulation.nodes(nodes);
@@ -50,9 +48,13 @@ export async function updateVisualisation(
     }
 }
 
+function updateFocused(svg: Element, focused: string): void {
+    updateTextElement(svg, focused, 'focused', 3 / 4, 0.5);
+}
 
-function updateFocused(svg: Element, focused: PokemonType): void {
-    updateTextElement(svg, (focused as string), 'focused', 0.5, 0.5);
+function updateFocusedTypes(svg: Element, focused: ITypeResponse[]): void {
+    const text = focused.map(t => t.name).join('/');
+    updateTextElement(svg, text, 'focused-types', 3 / 4, 0.65);
 }
 
 function updateTitle(svg: Element, title: string): void {

@@ -1,5 +1,7 @@
-import { INode } from './type_to_nodes'
+import { ITypeResponse } from './type_to_nodes'
 import { Pokedex } from 'pokeapi-js-wrapper';
+import typeToNodes from './type_to_nodes';
+import { INode } from './type_to_nodes';
 
 export interface ITypeField {
     type: {
@@ -17,30 +19,40 @@ export interface IPokemonResponse {
 const pokedex = new Pokedex({
     protocol: 'https',
     cache: true,
-    timeout: 5 * 1000,
+    timeout: 10 * 1000,
 });
 
-async function pokemonToTypes(response: IPokemonResponse): Promise<INode[]> {
-    const types = await response.types.map((typeField) => {
-        return pokedex.getTypeByName(typeField.type.name).name;
+export async function pokemonToTypes(response: IPokemonResponse): Promise<ITypeResponse[]> {
+    const responses = await response.types.map(async (typeField) => {
+        return await pokedex.getTypeByName(typeField.type.name) as ITypeResponse;
     });
-    return types;
+
+    return Promise.all(responses);
 }
 
-console.log(pokemonToTypes);
+export default (typeResponses: ITypeResponse[]): INode[] => {
+    const fromNodes = typeResponses.map((typeResponse) => {
+        return typeToNodes(typeResponse).filter((node) => node.direction === 'from')
+    }).reduce((acc, curr) => acc.concat(curr), []);
 
-// const fromNodes = flatten(types.map((type) => {
-//     return typeToNodes(types).filter((node) => node.direction === 'from')
-// }));
-// const sorted = [...fromNodes].sortBy(name)
-// return sorted.reduce((acc, curr) => {
-//     if (acc.last.name === curr.name) {
-//         return acc[:-1].concat(node(
-//             curr.name,
-//             curr.multiplier * acc.last.multiplier,
-//             curr.direction,
-//         ));
-//     }
-// 
-//     return acc.concat(curr);
-// });
+    const sorted = [...fromNodes].sort((a, b) => a.name.localeCompare(b.name));
+
+    const multiplied = sorted.reduce((acc, curr) => {
+        if (acc.length === 0) {
+            return acc.concat(curr);
+        }
+
+        const lastIndex = acc.length - 1;
+        if (acc[lastIndex].name === curr.name) {
+            return acc.slice(0, lastIndex).concat({
+                name: curr.name,
+                multiplier: curr.multiplier * acc[lastIndex].multiplier,
+                direction: curr.direction,
+            });
+        }
+
+        return acc.concat(curr);
+    }, [] as INode[]);
+
+    return multiplied.filter((node) => node.multiplier !== 1);
+}

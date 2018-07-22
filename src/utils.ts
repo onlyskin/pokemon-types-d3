@@ -4,7 +4,18 @@ import { PokemonType, INode } from './type_to_nodes';
 
 export const focusedType = stream<PokemonType>('fire');
 
+export const focusedPokemon = stream<string>('bulbasaur');
+
 export const hoveredNode = stream<INode | undefined>(undefined);
+
+export function updateFocusedPokemon(newPokemon: string): void {
+    if (newPokemon === focusedPokemon()) {
+        return;
+    }
+
+    focusedPokemon(newPokemon);
+    m.redraw();
+}
 
 export function updateFocusedType(newType: PokemonType) {
     if (newType === focusedType()) {
@@ -35,7 +46,7 @@ export function boundingWidth(svg: Element) {
     return boundingDimensions(svg).width;
 }
 
-export function visualisationTitle(hovered: INode, focused: PokemonType): string {
+export function visualisationTitle(hovered: INode, focused: string): string {
     if (hovered === undefined) {
         return '';
     }

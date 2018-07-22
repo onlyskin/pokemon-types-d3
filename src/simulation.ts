@@ -27,14 +27,14 @@ export function forceSimulation(
     });
 
     const xForce = d3.forceX<INode>(d => {
-        return d.direction === 'from' ? width / 4 : 3 * width / 4;
+        return width / 3;
     }).strength(X_STRENGTH);
 
     return d3.forceSimulation<INode>()
         .force("collision", collisionForce)
         .force("x", xForce)
         .force("antiCenter", d3.forceX<INode>(width * HALF).strength(CENTRE_REPULSION))
-        .force("y", d3.forceY(height * HALF))
+        .force("y", d3.forceY(height * HALF).strength(0.3))
         .stop();
 }
 

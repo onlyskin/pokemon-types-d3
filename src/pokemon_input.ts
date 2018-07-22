@@ -1,6 +1,7 @@
 import * as stream from 'mithril/stream';
 import * as m from 'mithril';
 import { Pokedex } from 'pokeapi-js-wrapper';
+import { updateFocusedPokemon } from './utils';
 
 export const pokemonList = stream<string[]>([]);
 
@@ -8,7 +9,7 @@ export function initPokemonList(): void {
     const pokedex = new Pokedex({
         protocol: 'https',
         cache: true,
-        timeout: 5 * 1000,
+        timeout: 10 * 1000,
     });
 
     pokedex.getPokemonsList().then((response: any) => {
@@ -23,7 +24,7 @@ export const PokemonInput: m.Component<{
     inputText: string,
 }> = {
     oninit: ({state}) => {
-        state.inputText = '';
+        state.inputText = 'bulbasaur';
     },
     view: ({attrs: {pokemon}, state}) => {
         return [
@@ -31,7 +32,13 @@ export const PokemonInput: m.Component<{
                 list: 'pokemon-dropdown',
                 placeholder: 'bulbasaur',
                 autocomplete: 'off',
-                oninput: m.withAttr('value', v => state.inputText = v),
+                oninput: m.withAttr('value', value => {
+                    state.inputText = value;
+
+                    if (pokemonList().indexOf(value) !== -1) {
+                        updateFocusedPokemon(value);
+                    }
+                }),
                 value: state.inputText,
             }),
             m(
