@@ -23,6 +23,14 @@ svg circle:hover {
   user-select: none;
 }
 
+#pokemon-input {
+  font-size: 30px;
+}
+
+#pokemon-input::placeholder {
+  color: #cdcdcd;
+}
+
 .normal {
   fill: #8a8a59;
   fill: linear-gradient(#a8a878, #8a8a59);

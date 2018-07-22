@@ -4,6 +4,7 @@ import { PokemonType, INode } from './type_to_nodes';
 import { updateVisualisation } from './update_visualisation';
 import { focusedType, hoveredNode, visualisationTitle } from './utils';
 import { forceSimulation } from './simulation';
+import { pokemonList, initPokemonList, PokemonInput } from './pokemon_input';
 
 const Visualisation: m.Component<{
     focused: PokemonType,
@@ -36,12 +37,20 @@ window.addEventListener('resize', () => {
     m.redraw();
 });
 
+initPokemonList();
+
 m.mount(document.body, {
     view: () => {
-        return m(Visualisation, {
-            focused: focusedType(),
-            title: visualisationTitle(hoveredNode(), focusedType()),
-            forceSimulation,
-        });
+        return [
+            m(PokemonInput, {pokemon: pokemonList()}),
+            m(Visualisation, {
+                focused: focusedType(),
+                title: visualisationTitle(
+                    hoveredNode(),
+                    focusedType(),
+                ),
+                forceSimulation,
+            }),
+        ];
     }
 });
