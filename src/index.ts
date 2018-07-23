@@ -2,7 +2,7 @@ import * as m from 'mithril';
 import * as d3 from 'd3';
 import { INode } from './type_to_nodes';
 import { updateVisualisation } from './update_visualisation';
-import { focusedPokemon, hoveredNode, visualisationTitle } from './utils';
+import { updateFocusedPokemon, focusedPokemon, hoveredNode, visualisationTitle } from './utils';
 import { forceSimulation } from './simulation';
 import { pokemonList, initPokemonList, PokemonInput } from './pokemon_input';
 
@@ -39,10 +39,24 @@ window.addEventListener('resize', () => {
 
 initPokemonList();
 
+const RandomPokemonButton: m.Component<{}, {}> = {
+    view: () => {
+        return m('button', {
+            onclick: () => {
+                const allPokemon = pokemonList();
+                const randomIndex = Math.floor(allPokemon.length * Math.random());
+                const randomPokemon = allPokemon[randomIndex];
+                updateFocusedPokemon(randomPokemon);
+            },
+        }, 'Random');
+    },
+};
+
 m.mount(document.body, {
     view: () => {
         return [
             m(PokemonInput, {pokemon: pokemonList()}),
+            m(RandomPokemonButton),
             m(Visualisation, {
                 focused: focusedPokemon(),
                 title: visualisationTitle(
