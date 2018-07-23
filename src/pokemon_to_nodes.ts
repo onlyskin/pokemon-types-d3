@@ -1,7 +1,6 @@
-import { ITypeResponse } from './type_to_nodes'
-import { Pokedex } from 'pokeapi-js-wrapper';
-import typeToNodes from './type_to_nodes';
-import { INode } from './type_to_nodes';
+import { ITypeResponse, typeToNodes } from './type_to_nodes'
+import { pokedex } from './pokeapi';
+import { INode } from './simulation';
 
 export interface ITypeField {
     type: {
@@ -14,14 +13,6 @@ export interface IPokemonResponse {
     types: ITypeField[];
 }
 
-// const response: IPokemonResponse = await pokedex.getPokemonByName('bulbasaur');
-
-const pokedex = new Pokedex({
-    protocol: 'https',
-    cache: true,
-    timeout: 10 * 1000,
-});
-
 export async function pokemonToTypes(response: IPokemonResponse): Promise<ITypeResponse[]> {
     const responses = await response.types.map(async (typeField) => {
         return await pokedex.getTypeByName(typeField.type.name) as ITypeResponse;
@@ -30,7 +21,7 @@ export async function pokemonToTypes(response: IPokemonResponse): Promise<ITypeR
     return Promise.all(responses);
 }
 
-export default (typeResponses: ITypeResponse[]): INode[] => {
+export function pokemonTypesToNodes(typeResponses: ITypeResponse[]): INode[] {
     const fromNodes = typeResponses.map((typeResponse) => {
         return typeToNodes(typeResponse).filter((node) => node.direction === 'from')
     }).reduce((acc, curr) => acc.concat(curr), []);

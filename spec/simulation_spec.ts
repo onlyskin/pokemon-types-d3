@@ -2,8 +2,7 @@ import * as windowMock from 'mithril/test-utils/browserMock';
 (global as any).window = windowMock();
 (global as any).document = window.document;
 import * as o from 'ospec';
-import { INode } from '../src/type_to_nodes';
-import { nodeRadius } from '../src/simulation';
+import { nodeRadius, INode } from '../src/simulation';
 
 o.spec('calculate node radius', () => {
     o('returns scaled svg bounding width times 0.5', () => {

@@ -1,22 +1,6 @@
-import * as stream from 'mithril/stream';
 import * as m from 'mithril';
-import { Pokedex } from 'pokeapi-js-wrapper';
-import { updateFocusedPokemon } from './utils';
-
-export const pokemonList = stream<string[]>([]);
-
-export function initPokemonList(): void {
-    const pokedex = new Pokedex({
-        protocol: 'https',
-        cache: true,
-        timeout: 10 * 1000,
-    });
-
-    pokedex.getPokemonsList().then((response: any) => {
-        const pokemon = response.results.map((r: any) => r.name);
-        pokemonList(pokemon);
-    });
-}
+import { updateFocusedPokemon } from './actions';
+import { pokemonList } from './pokeapi';
 
 export const PokemonInput: m.Component<{
     pokemon: string[],

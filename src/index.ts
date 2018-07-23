@@ -1,56 +1,16 @@
 import * as m from 'mithril';
-import * as d3 from 'd3';
-import { INode } from './type_to_nodes';
-import { updateVisualisation } from './update_visualisation';
-import { updateFocusedPokemon, focusedPokemon, hoveredNode, visualisationTitle } from './utils';
+import { Visualisation } from './visualisation';
+import { focusedPokemon, hoveredNode, visualisationTitle } from './actions';
 import { forceSimulation } from './simulation';
-import { pokemonList, initPokemonList, PokemonInput } from './pokemon_input';
-
-const Visualisation: m.Component<{
-    focused: string,
-    title: string,
-    forceSimulation: (svg: Element) => d3.Simulation<INode, undefined>,
-}, {
-    oldFocused: string,
-}> = {
-    oncreate: ({attrs: {focused, title, forceSimulation}, dom}) => {
-        updateVisualisation(dom, focused, title, forceSimulation, true);
-        this.oldFocused = focused;
-    },
-    onupdate: ({attrs: {focused, title, forceSimulation}, dom}) => {
-        const focusedUpdated = focused !== this.oldFocused;
-        updateVisualisation(dom, focused, title, forceSimulation, focusedUpdated);
-        this.oldFocused = focused;
-    },
-    view: ({attrs: {focused}}) => {
-        return m(
-            'svg',
-            {
-                version: '1',
-                xmlns: 'http://www.w3.org/2000/svg',
-            },
-        );
-    },
-};
+import { PokemonInput } from './pokemon_input';
+import { pokemonList, initPokemonList } from './pokeapi';
+import { RandomPokemonButton } from './random_pokemon';
 
 window.addEventListener('resize', () => {
     m.redraw();
 });
 
 initPokemonList();
-
-const RandomPokemonButton: m.Component<{}, {}> = {
-    view: () => {
-        return m('button', {
-            onclick: () => {
-                const allPokemon = pokemonList();
-                const randomIndex = Math.floor(allPokemon.length * Math.random());
-                const randomPokemon = allPokemon[randomIndex];
-                updateFocusedPokemon(randomPokemon);
-            },
-        }, 'Random');
-    },
-};
 
 m.mount(document.body, {
     view: () => {

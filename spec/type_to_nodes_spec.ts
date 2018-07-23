@@ -1,6 +1,6 @@
 import * as o from 'ospec';
 import { ITypeResponse } from '../src/type_to_nodes';
-import typeToNodes from '../src/type_to_nodes';
+import { typeToNodes } from '../src/type_to_nodes';
 
 o('it should parse type json', () => {
     const response: ITypeResponse = {

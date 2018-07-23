@@ -1,6 +1,15 @@
 import * as d3 from 'd3';
-import { INode } from './type_to_nodes';
-import { boundingDimensions, boundingWidth } from './utils';
+import { boundingDimensions, boundingWidth } from './actions';
+
+export type PokemonType = 'normal' | 'fire' | 'fighting' | 'water' | 'flying' | 'grass' | 'poison' | 'electric' | 'ground' | 'psychic' | 'rock' | 'ice' | 'bug' | 'dragon' | 'ghost' | 'dark' | 'steel' | 'fairy';
+
+export type Direction = 'from' | 'to';
+
+export interface INode extends d3.SimulationNodeDatum {
+    name: PokemonType;
+    multiplier: number;
+    direction: Direction;
+}
 
 const NODE_SIZE_FACTOR = 0.03;
 const NODE_SPACING_FACTOR = 0.005;

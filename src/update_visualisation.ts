@@ -1,17 +1,9 @@
 import * as d3 from 'd3';
-import { Pokedex } from 'pokeapi-js-wrapper';
-import { INode } from './type_to_nodes';
-import { boundingDimensions, focusedType, updateFocusedType, updateHoveredNode } from './utils';
-import { tick, nodeRadius } from './simulation';
+import { pokedex } from './pokeapi';
+import { boundingDimensions, focusedType, updateFocusedType, updateHoveredNode } from './actions';
+import { tick, nodeRadius, INode } from './simulation';
 import { ITypeResponse } from './type_to_nodes';
-import { pokemonToTypes } from './pokemon_to_nodes';
-import pokemonTypesToNodes from './pokemon_to_nodes';
-
-const pokedex = new Pokedex({
-    protocol: 'https',
-    cache: true,
-    timeout: 10 * 1000,
-});
+import { pokemonTypesToNodes, pokemonToTypes } from './pokemon_to_nodes';
 
 function id<T>(x: T): T {
     return x;

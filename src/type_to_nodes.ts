@@ -1,12 +1,4 @@
-type Direction = 'from' | 'to';
-
-export type PokemonType = 'normal' | 'fire' | 'fighting' | 'water' | 'flying' | 'grass' | 'poison' | 'electric' | 'ground' | 'psychic' | 'rock' | 'ice' | 'bug' | 'dragon' | 'ghost' | 'dark' | 'steel' | 'fairy';
-
-export interface INode extends d3.SimulationNodeDatum {
-    name: PokemonType;
-    multiplier: number;
-    direction: Direction;
-}
+import { INode, Direction, PokemonType } from './simulation';
 
 interface IDamageRelation {
     name: PokemonType;
@@ -25,7 +17,7 @@ export interface ITypeResponse {
     };
 }
 
-export default (response: ITypeResponse): INode[] => {
+export function typeToNodes(response: ITypeResponse): INode[] {
     const x = [
         { key: 'half_damage_from', multiplier: 0.5, direction: 'from' },
         { key: 'no_damage_from', multiplier: 0, direction: 'from' },

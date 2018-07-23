@@ -1,6 +1,7 @@
 import * as o from 'ospec';
-import { ITypeResponse, INode } from '../src/type_to_nodes';
-import pokemonTypesToNodes from '../src/pokemon_to_nodes';
+import { ITypeResponse} from '../src/type_to_nodes';
+import { pokemonTypesToNodes } from '../src/pokemon_to_nodes';
+import { INode } from '../src/simulation';
 
 o('it gets pokemon types', () => {
     const typeResponses: ITypeResponse[] = [
