@@ -22,12 +22,12 @@ export async function updateVisualisation(
     svg.setAttribute('width', width.toString());
     svg.setAttribute('height', height.toString());
 
-    updateFocused(svg, focused);
     updateTitle(svg, title);
 
     if (focusedUpdated) {
         const response = await pokedex.getPokemonByName(focused);
         const types = await pokemonToTypes(response);
+        updateFocused(svg, focused);
         updateFocusedTypes(svg, types);
 
         const nodes = pokemonTypesToNodes(types);
