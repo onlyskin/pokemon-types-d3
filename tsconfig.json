@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./out/",
+    "outDir": "./out/compiled",
     "sourceMap": true,
     "noImplicitAny": true,
     "noUnusedLocals": true,
