@@ -6,6 +6,12 @@ export const focusedType = stream<PokemonType>('fire');
 
 export const hoveredNode = stream<INode | undefined>(undefined);
 
+const NODE_SIZE_FACTOR = 0.03;
+
+export function nodeRadius(node: INode): number {
+    return (node.multiplier === 0 ? 0.1 : node.multiplier) * NODE_SIZE_FACTOR;
+}
+
 export function updateFocusedType(newType: PokemonType) {
     if (newType === focusedType()) {
         return;

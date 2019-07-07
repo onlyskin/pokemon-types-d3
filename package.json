@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "./build"
+    "build": "./build",
+    "lint": "jshint src/"
   },
   "dependencies": {
     "d3": "^5.5.0",
@@ -15,9 +16,10 @@
     "@types/d3": "^5.0.0",
     "@types/mithril": "^1.1.12",
     "@types/node": "^10.5.2",
-    "ospec": "^3.0.1",
-    "typescript": "^2.9.2",
     "browserify": "^16.2.2",
-    "exorcist": "^1.0.1"
+    "exorcist": "^1.0.1",
+    "jshint": "^2.10.2",
+    "ospec": "^3.0.1",
+    "typescript": "^2.9.2"
   }
 }

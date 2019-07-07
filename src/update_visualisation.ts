@@ -1,9 +1,9 @@
 import * as d3 from 'd3';
 import { Pokedex } from 'pokeapi-js-wrapper';
 import { PokemonType, INode } from './type_to_nodes';
-import { boundingDimensions, focusedType, updateFocusedType, updateHoveredNode } from './utils';
+import { boundingDimensions, focusedType, updateFocusedType, updateHoveredNode, nodeRadius } from './utils';
 import type_to_nodes from './type_to_nodes';
-import { tick, nodeRadius } from './simulation';
+import { tick } from './simulation';
 
 const pokedex = new Pokedex({
     protocol: 'https',
@@ -25,16 +25,13 @@ export async function updateVisualisation(
     svg: Element,
     focused: PokemonType,
     title: string,
-    forceSimulation: (
-        svg: Element
-    ) => d3.Simulation<INode, undefined>,
+    simulation: d3.Simulation<INode, undefined>,
     focusedUpdated: boolean,
 ): Promise<void> {
     const { width, height } = boundingDimensions(svg);
     svg.setAttribute('width', width.toString());
     svg.setAttribute('height', height.toString());
 
-    updateFocused(svg, focused);
     updateTitle(svg, title);
 
     if (focusedUpdated) {
@@ -42,12 +39,13 @@ export async function updateVisualisation(
         const nodes: INode[] = type_to_nodes(response);
         preloadData(nodes);
 
-        const simulation = forceSimulation(svg);
         simulation.nodes(nodes);
         tick(simulation);
 
-        updateCircles(svg, simulation);
     }
+
+    updateCircles(svg, simulation, focusedUpdated);
+    updateFocused(svg, focused);
 }
 
 
@@ -86,9 +84,14 @@ function updateTextElement(
         .remove();
 }
 
-function updateCircles(svg: Element, simulation: d3.Simulation<INode, undefined>): void {
+function updateCircles(
+    svg: Element,
+    simulation: d3.Simulation<INode, undefined>,
+    focusedUpdated: boolean
+): void {
+    const { width, height } = boundingDimensions(svg);
     const nodeTransition = d3.transition()
-        .duration(600);
+        .duration(focusedUpdated ? 600 : 0);
 
     const updatingNodes = d3.select(svg)
         .selectAll<Element, INode>('circle')
@@ -108,8 +111,8 @@ function updateCircles(svg: Element, simulation: d3.Simulation<INode, undefined>
 
     enteringNodes
         .attr('class', d => d.name)
-        .attr('cx', d => d.x)
-        .attr('cy', d => d.y)
+        .attr('cx', d => d.x * width)
+        .attr('cy', d => d.y * height)
         .on('click', function(d) {
             if (focusedType() === d.name) {
                 return;
@@ -125,10 +128,9 @@ function updateCircles(svg: Element, simulation: d3.Simulation<INode, undefined>
 
     mergedNodes
         .transition(nodeTransition)
-        .attr('cx', d => d.x)
-        .attr('cy', d => d.y)
-        .attr('r', d => nodeRadius(d, svg));
-
+        .attr('cx', d => d.x * width)
+        .attr('cy', d => d.y * height)
+        .attr('r', d => nodeRadius(d) * Math.min(width, height));
     exitingNodes
         .transition(nodeTransition)
         .attr('r', 0)
