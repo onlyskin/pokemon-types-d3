@@ -1,4 +1,4 @@
-import * as m from 'mithril';
+import m from 'mithril';
 import * as d3 from 'd3';
 import { PokemonType, INode } from './type_to_nodes';
 import { updateVisualisation } from './update_visualisation';

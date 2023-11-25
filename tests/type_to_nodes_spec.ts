@@ -1,4 +1,4 @@
-import * as o from 'ospec';
+import o from 'ospec';
 import { ITypeResponse } from '../src/type_to_nodes';
 import typeToNodes from '../src/type_to_nodes';
 

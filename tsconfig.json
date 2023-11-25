@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "./out/compiled",
-    "sourceMap": true,
+    "esModuleInterop": true,
     "noImplicitAny": true,
     "noUnusedLocals": true,
     "downlevelIteration": true,

@@ -1,5 +1,5 @@
-import * as stream from 'mithril/stream';
-import * as m from 'mithril';
+import stream from 'mithril/stream';
+import m from 'mithril';
 import { PokemonType, INode } from './type_to_nodes';
 
 export const focusedType = stream<PokemonType>('fire');

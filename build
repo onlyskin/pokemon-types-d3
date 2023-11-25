@@ -2,15 +2,13 @@
 
 SRC=src
 OUT=out
+ESBUILD=node_modules/.bin/esbuild
 TSC=node_modules/typescript/bin/tsc
-BROWSERIFY=node_modules/browserify/bin/cmd.js
-EXORCIST=node_modules/.bin/exorcist
 
 rm -rf $OUT
 mkdir -p $OUT
 
-$TSC -sourcemap
-$BROWSERIFY $OUT/compiled/src/index.js --debug | $EXORCIST $OUT/index.bundle.js.map > $OUT/index.bundle.js
+$ESBUILD $SRC/index.ts --bundle --minify --sourcemap --outfile=$OUT/index.bundle.js
 
 cp index.html $OUT/index.html
 cp css/* $OUT/
