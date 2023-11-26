@@ -1,5 +1,7 @@
 out/
 tests/test_runner.bundle.js
+src/**/*.js
+tests/**/*.js
 
 # Created by https://www.gitignore.io/api/node
 

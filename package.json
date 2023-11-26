@@ -1,7 +1,6 @@
 {
   "name": "pokemon-types-d3",
   "version": "1.0.0",
-  "main": "src/index.ts",
   "license": "MIT",
   "scripts": {
     "build": "./build",
@@ -15,11 +14,12 @@
     "pokeapi-js-wrapper": "^1.1.1"
   },
   "devDependencies": {
-    "@types/d3": "^5.0.0",
+    "@types/d3": "^5.5.0",
     "@types/mithril": "^2.2.6",
-    "@types/node": "^10.5.2",
+    "@types/ospec": "^4.0.10",
     "esbuild": "^0.19.7",
     "ospec": "^4.2.0",
+    "tsc": "^2.0.4",
     "typescript": "^5.3.2"
   }
 }

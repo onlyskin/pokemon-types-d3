@@ -1,9 +1,9 @@
 {
+  "include": ["src/**/*", "tests/**/*"],
   "compilerOptions": {
     "esModuleInterop": true,
     "noImplicitAny": true,
     "noUnusedLocals": true,
-    "downlevelIteration": true,
     "target": "es5",
     "lib": [
       "es6", "dom"

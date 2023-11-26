@@ -1,27 +1,48 @@
 import m from 'mithril';
+import stream from 'mithril/stream';
 import * as d3 from 'd3';
 import { PokemonType, INode } from './type_to_nodes';
 import { updateVisualisation } from './update_visualisation';
-import { focusedType, hoveredNode, visualisationTitle } from './utils';
+import { IState } from './utils';
 import { forceSimulation } from './simulation';
 
+const state: IState = {
+    focusedType: stream<PokemonType>('fire'),
+    hoveredNode: stream<INode | undefined>(undefined),
+    setFocusedType: function(newType: PokemonType) {
+        if (newType === this.focusedType()) {
+            return;
+        }
+    
+        this.focusedType(newType);
+        m.redraw();
+    },
+    setHoveredNode: function(newNode?: INode) {
+        if (newNode === this.hoveredNode()) {
+            return;
+        }
+    
+        this.hoveredNode(newNode);
+        m.redraw();
+    }
+};
+
 const Visualisation: m.Component<{
-    focused: PokemonType,
-    title: string,
     simulation: d3.Simulation<INode, undefined>,
+    state: IState,
 }, {
     oldFocused: PokemonType,
 }> = {
-    oncreate: ({attrs: {focused, title, simulation}, dom}) => {
-        updateVisualisation(dom, focused, title, simulation, true);
-        this.oldFocused = focused;
+    oncreate: function({attrs: {simulation, state}, dom}) {
+        updateVisualisation(dom, simulation, true, state);
+        this.oldFocused = state.focusedType();
     },
-    onupdate: ({attrs: {focused, title, simulation}, dom}) => {
-        const focusedUpdated = focused !== this.oldFocused;
-        updateVisualisation(dom, focused, title, simulation, focusedUpdated);
-        this.oldFocused = focused;
+    onupdate: function({attrs: {simulation, state}, dom}) {
+        const focusedUpdated = state.focusedType() !== this.oldFocused;
+        updateVisualisation(dom, simulation, focusedUpdated, state);
+        this.oldFocused = state.focusedType();
     },
-    view: ({attrs: {focused}}) => {
+    view: () => {
         return m(
             'svg',
             {
@@ -41,8 +62,7 @@ const simulation = forceSimulation();
 m.mount(document.body, {
     view: () => {
         return m(Visualisation, {
-            focused: focusedType(),
-            title: visualisationTitle(hoveredNode(), focusedType()),
+            state,
             simulation,
         });
     }

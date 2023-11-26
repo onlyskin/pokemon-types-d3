@@ -3,7 +3,6 @@
 SRC=src
 OUT=out
 ESBUILD=node_modules/.bin/esbuild
-TSC=node_modules/typescript/bin/tsc
 
 rm -rf $OUT
 mkdir -p $OUT

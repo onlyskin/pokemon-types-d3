@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { Pokedex } from 'pokeapi-js-wrapper';
 import { PokemonType, INode } from './type_to_nodes';
-import { boundingDimensions, focusedType, updateFocusedType, updateHoveredNode, nodeRadius } from './utils';
+import { boundingDimensions, nodeRadius, IState } from './utils';
 import type_to_nodes from './type_to_nodes';
 import { tick } from './simulation';
 
@@ -23,29 +23,27 @@ function preloadData(nodes: INode[]): void {
 
 export async function updateVisualisation(
     svg: Element,
-    focused: PokemonType,
-    title: string,
     simulation: d3.Simulation<INode, undefined>,
     focusedUpdated: boolean,
+    state: IState,
 ): Promise<void> {
     const { width, height } = boundingDimensions(svg);
     svg.setAttribute('width', width.toString());
     svg.setAttribute('height', height.toString());
 
-    updateTitle(svg, title);
+    updateTitle(svg, state);
 
     if (focusedUpdated) {
-        const response = await pokedex.getTypeByName(focused);
+        const response = await pokedex.getTypeByName(state.focusedType());
         const nodes: INode[] = type_to_nodes(response);
         preloadData(nodes);
 
         simulation.nodes(nodes);
         tick(simulation);
-
     }
 
-    updateCircles(svg, simulation, focusedUpdated);
-    updateFocused(svg, focused);
+    updateCircles(svg, simulation, state);
+    updateFocused(svg, state.focusedType());
 }
 
 
@@ -53,8 +51,30 @@ function updateFocused(svg: Element, focused: PokemonType): void {
     updateTextElement(svg, (focused as string), 'focused', 0.5, 0.5);
 }
 
-function updateTitle(svg: Element, title: string): void {
-    updateTextElement(svg, title, 'title', 0.5, 0.125);
+export function visualisationTitle(state: IState): string {
+    const hovered = state.hoveredNode();
+    const focused = state.focusedType();
+
+    if (hovered === undefined) {
+        return '';
+    }
+
+    let attacking;
+    let defending;
+
+    if (hovered.direction === 'from') {
+        attacking = hovered.name;
+        defending = focused;
+    } else {
+        attacking = focused;
+        defending = hovered.name;
+    }
+
+    return `${attacking} gets ${hovered.multiplier}x against ${defending}`;
+}
+
+function updateTitle(svg: Element, state: IState): void {
+    updateTextElement(svg, visualisationTitle(state), 'title', 0.5, 0.125);
 }
 
 function updateTextElement(
@@ -67,12 +87,12 @@ function updateTextElement(
     const { width, height } = boundingDimensions(svg);
 
     const updating = d3.select(svg)
-        .selectAll(`.${className}`)
+        .selectAll<Element, string>(`.${className}`)
         .data<string>([text], d => (d as string));
 
     updating
         .enter()
-        .append('text')
+        .append<Element>('text')
         .merge(updating)
         .classed(className, true)
         .attr('x', width * xMultiple)
@@ -87,11 +107,11 @@ function updateTextElement(
 function updateCircles(
     svg: Element,
     simulation: d3.Simulation<INode, undefined>,
-    focusedUpdated: boolean
+    state: IState,
 ): void {
     const { width, height } = boundingDimensions(svg);
     const nodeTransition = d3.transition()
-        .duration(focusedUpdated ? 600 : 0);
+        .duration(600);
 
     const updatingNodes = d3.select(svg)
         .selectAll<Element, INode>('circle')
@@ -114,16 +134,16 @@ function updateCircles(
         .attr('cx', d => d.x * width)
         .attr('cy', d => d.y * height)
         .on('click', function(d) {
-            if (focusedType() === d.name) {
+            if (state.focusedType() === d.name) {
                 return;
             }
 
-            updateFocusedType(d.name);
-            updateHoveredNode(undefined);
+            state.setFocusedType(d.name);
+            state.setHoveredNode(undefined);
             this.dispatchEvent(new Event('mouseout'));
         })
-        .on('mouseover', d => updateHoveredNode(d))
-        .on('mouseout', d => updateHoveredNode(undefined))
+        .on('mouseover', d => state.setHoveredNode(d))
+        .on('mouseout', d => state.setHoveredNode(undefined))
         .attr('r', 0);
 
     mergedNodes
@@ -131,6 +151,7 @@ function updateCircles(
         .attr('cx', d => d.x * width)
         .attr('cy', d => d.y * height)
         .attr('r', d => nodeRadius(d) * Math.min(width, height));
+
     exitingNodes
         .transition(nodeTransition)
         .attr('r', 0)
