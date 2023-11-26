@@ -3,8 +3,10 @@ import { PokemonType, INode } from './type_to_nodes';
 export interface IState {
     focusedType: () => PokemonType;
     hoveredNode: () => INode | undefined;
+    activeTransition: boolean;
     setFocusedType: (newType: PokemonType) => undefined;
     setHoveredNode: (newNode?: INode) => undefined;
+    setActiveTransition: (isActive: boolean) => undefined;
 }
 
 const NODE_SIZE_FACTOR = 0.03;
