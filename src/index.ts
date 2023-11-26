@@ -57,34 +57,16 @@ interface VisualisationAttrs {
     simulation: d3.Simulation<INode, undefined>,
     state: IState,
 }
-type VisualisationVnode = m.Vnode<VisualisationAttrs, Visualisation>;
-type VisualisationVnodeDOM = m.VnodeDOM<VisualisationAttrs, Visualisation>;
 
-class Visualisation implements m.ClassComponent<VisualisationAttrs> {
-    oldFocused: PokemonType;
+const Visualisation: m.ClosureComponent<VisualisationAttrs> = function({attrs: {state}}) {
+    let oldFocused: PokemonType = state.focusedType();
 
-    constructor({attrs: {state}}: VisualisationVnode) {
-        this.oldFocused = state.focusedType();
+    function domComputations(state: IState, dom: Element) {
+        updateFocusedText(state, dom);
+        updateTitle(state, dom);
     }
 
-    oncreate({attrs: {simulation, state}, dom}: VisualisationVnodeDOM) {
-        updateVisualisation(dom, simulation, true, state);
-        this.domComputations(state, dom);
-    }
-
-    onupdate({attrs: {simulation, state}, dom}: VisualisationVnodeDOM) {
-        const focusedUpdated = state.focusedType() !== this.oldFocused;
-        updateVisualisation(dom, simulation, focusedUpdated, state);
-        this.oldFocused = state.focusedType();
-        this.domComputations(state, dom);
-    }
-
-    domComputations(state: IState, dom: Element) {
-        this.updateFocusedText(state, dom);
-        this.updateTitle(state, dom);
-    }
-
-    updateFocusedText(state: IState, dom: Element) {
+    function updateFocusedText(state: IState, dom: Element) {
         const {height, width} = boundingDimensions(dom);
         const el = dom.querySelector('#focused-text');
         el.setAttribute('x', (width * 0.5).toString());
@@ -92,7 +74,7 @@ class Visualisation implements m.ClassComponent<VisualisationAttrs> {
         el.textContent = state.focusedType();
     }
 
-    updateTitle(state: IState, dom: Element) {
+    function updateTitle(state: IState, dom: Element) {
         const {height, width} = boundingDimensions(dom);
         const el = dom.querySelector('#title-text');
         el.setAttribute('x', (width * 0.5).toString());
@@ -100,16 +82,28 @@ class Visualisation implements m.ClassComponent<VisualisationAttrs> {
         el.textContent = visualisationTitle(state);
     }
 
-    view() {
-        return m(
-            'svg',
-            {
-                version: '1',
-                xmlns: 'http://www.w3.org/2000/svg',
-            },
-            m('text#focused-text', {}, 'bug'),
-            m('text#title-text', {}, 'bug'),
-        );
+    return {
+        oncreate: function({attrs: {simulation, state}, dom}) {
+            updateVisualisation(dom, simulation, true, state);
+            domComputations(state, dom);
+        },
+        onupdate: function({attrs: {simulation, state}, dom}) {
+            const focusedUpdated = state.focusedType() !== oldFocused;
+            updateVisualisation(dom, simulation, focusedUpdated, state);
+            oldFocused = state.focusedType();
+            domComputations(state, dom);
+        },
+        view: function() {
+            return m(
+                'svg',
+                {
+                    version: '1',
+                    xmlns: 'http://www.w3.org/2000/svg',
+                },
+                m('text#focused-text', {}, 'bug'),
+                m('text#title-text', {}, 'bug'),
+            );
+        },
     }
 };
 
