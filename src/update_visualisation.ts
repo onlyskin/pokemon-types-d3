@@ -11,10 +11,6 @@ const pokedex = new Pokedex({
     timeout: 5 * 1000,
 });
 
-function id<T>(x: T): T {
-    return x;
-}
-
 function preloadData(nodes: INode[]): void {
     nodes.map((node) => {
         pokedex.getTypeByName(node.name);

@@ -53,42 +53,54 @@ function visualisationTitle(state: IState): string {
     return `${attacking} gets ${hovered.multiplier}x against ${defending}`;
 }
 
-const Visualisation: m.Component<{
+interface VisualisationAttrs {
     simulation: d3.Simulation<INode, undefined>,
     state: IState,
-}, {
-    oldFocused: PokemonType,
-}> = {
-    oncreate: function({attrs: {simulation, state}, dom}) {
-        updateVisualisation(dom, simulation, true, state);
+}
+type VisualisationVnode = m.Vnode<VisualisationAttrs, Visualisation>;
+type VisualisationVnodeDOM = m.VnodeDOM<VisualisationAttrs, Visualisation>;
+
+class Visualisation implements m.ClassComponent<VisualisationAttrs> {
+    oldFocused: PokemonType;
+
+    constructor({attrs: {state}}: VisualisationVnode) {
         this.oldFocused = state.focusedType();
+    }
+
+    oncreate({attrs: {simulation, state}, dom}: VisualisationVnodeDOM) {
+        updateVisualisation(dom, simulation, true, state);
         this.domComputations(state, dom);
-    },
-    onupdate: function({attrs: {simulation, state}, dom}) {
+    }
+
+    onupdate({attrs: {simulation, state}, dom}: VisualisationVnodeDOM) {
         const focusedUpdated = state.focusedType() !== this.oldFocused;
         updateVisualisation(dom, simulation, focusedUpdated, state);
         this.oldFocused = state.focusedType();
         this.domComputations(state, dom);
-    },
-    domComputations: function(state: IState, dom: Element) {
+    }
+
+    domComputations(state: IState, dom: Element) {
         this.updateFocusedText(state, dom);
         this.updateTitle(state, dom);
-    },
-    updateFocusedText: function(state: IState, dom: Element) {
+    }
+
+    updateFocusedText(state: IState, dom: Element) {
         const {height, width} = boundingDimensions(dom);
         const el = dom.querySelector('#focused-text');
         el.setAttribute('x', (width * 0.5).toString());
         el.setAttribute('y', (height * 0.5).toString());
         el.textContent = state.focusedType();
-    },
-    updateTitle: function(state: IState, dom: Element) {
+    }
+
+    updateTitle(state: IState, dom: Element) {
         const {height, width} = boundingDimensions(dom);
         const el = dom.querySelector('#title-text');
         el.setAttribute('x', (width * 0.5).toString());
         el.setAttribute('y', (height * 0.125).toString());
         el.textContent = visualisationTitle(state);
-    },
-    view: () => {
+    }
+
+    view() {
         return m(
             'svg',
             {
@@ -98,7 +110,7 @@ const Visualisation: m.Component<{
             m('text#focused-text', {}, 'bug'),
             m('text#title-text', {}, 'bug'),
         );
-    },
+    }
 };
 
 window.addEventListener('resize', () => {
