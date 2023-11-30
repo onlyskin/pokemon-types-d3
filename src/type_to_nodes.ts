@@ -13,7 +13,7 @@ interface IDamageRelation {
 }
 
 export interface ITypeResponse {
-    name: string;
+    name: PokemonType;
     damage_relations: {
         half_damage_to: IDamageRelation[];
         double_damage_to: IDamageRelation[];

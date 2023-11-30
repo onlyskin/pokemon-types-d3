@@ -1,41 +1,24 @@
 import * as d3 from 'd3';
-import { Pokedex } from 'pokeapi-js-wrapper';
 import { INode } from './type_to_nodes';
 import { boundingDimensions, nodeRadius, IState } from './utils';
-import type_to_nodes from './type_to_nodes';
 import { tick } from './simulation';
-
-const pokedex = new Pokedex({
-    protocol: 'https',
-    cache: true,
-    timeout: 5 * 1000,
-});
-
-function preloadData(nodes: INode[]): void {
-    nodes.map((node) => {
-        pokedex.getTypeByName(node.name);
-    });
-}
+import { PokemonTypeDict } from './pokedex';
 
 export async function updateVisualisation(
     svg: Element,
     simulation: d3.Simulation<INode, undefined>,
-    focusedUpdated: boolean,
     state: IState,
+    pokemonTypeDict: PokemonTypeDict,
 ): Promise<void> {
     const { width, height } = boundingDimensions(svg);
     svg.setAttribute('width', width.toString());
     svg.setAttribute('height', height.toString());
 
-    if (focusedUpdated) {
-        const response = await pokedex.getTypeByName(state.focusedType());
-        const nodes: INode[] = type_to_nodes(response);
-        preloadData(nodes);
+    const nodes = pokemonTypeDict[state.focusedType()];
 
-        simulation.nodes(nodes);
-        tick(simulation);
-        updateCircles(svg, simulation, state);
-    }
+    simulation.nodes(nodes);
+    tick(simulation);
+    updateCircles(svg, simulation, state);
 }
 
 function updateCircles(

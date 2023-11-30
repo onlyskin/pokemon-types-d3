@@ -1,5 +1,10 @@
 import { PokemonType, INode } from './type_to_nodes';
 
+export interface Result<T> {
+    status: 'SUCCESS' | 'ERROR' | 'LOADING';
+    value: T;
+}
+
 export interface IState {
     focusedType: () => PokemonType;
     hoveredNode: () => INode | undefined;
