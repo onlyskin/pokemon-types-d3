@@ -7,7 +7,7 @@ export interface Result<T> {
 
 export interface IState {
     focusedType: () => PokemonType;
-    hoveredNode: () => INode | undefined;
+    hoveredNode: INode | undefined;
     activeTransition: boolean;
     setFocusedType: (newType: PokemonType) => undefined;
     setHoveredNode: (newNode?: INode) => undefined;

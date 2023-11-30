@@ -13,7 +13,7 @@ const state: IState = {
         this.activeTransition = is_active;
     },
     focusedType: stream<PokemonType>('fire'),
-    hoveredNode: stream<INode | undefined>(undefined),
+    hoveredNode: undefined,
     setFocusedType: function(newType: PokemonType) {
         if (newType === this.focusedType()) {
             return;
@@ -23,17 +23,17 @@ const state: IState = {
         m.redraw();
     },
     setHoveredNode: function(newNode?: INode) {
-        if (newNode === this.hoveredNode() || this.activeTransition) {
+        if (newNode === this.hoveredNode || this.activeTransition) {
             return;
+        } else {
+            this.hoveredNode = newNode;
+            m.redraw();
         }
-    
-        this.hoveredNode(newNode);
-        m.redraw();
     }
 };
 
 function visualisationTitle(state: IState): string {
-    const hovered = state.hoveredNode();
+    const hovered = state.hoveredNode;
     const focused = state.focusedType();
 
     if (hovered === undefined) {

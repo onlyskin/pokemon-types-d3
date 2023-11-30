@@ -63,7 +63,7 @@ function updateCircles(
 
             state.setFocusedType(d.name);
             state.setHoveredNode(undefined);
-            this.dispatchEvent(new Event('mouseout'));
+            state.setActiveTransition(true);
         })
         .on('mouseover', d => {
             state.setHoveredNode(d);
