@@ -23,6 +23,10 @@ export class ResultPokedex implements IPokedex {
             timeout: 5 * 1000,
         });
 
+        this.loadTypeData(pokedex);
+    }
+
+    loadTypeData(pokedex: any) {
         pokedex.getTypesList()
           .then((types: any) => types.results
                 .map((result: any) => result.name)
