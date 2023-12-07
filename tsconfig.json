@@ -2,11 +2,10 @@
   "include": ["src/**/*", "tests/**/*"],
   "compilerOptions": {
     "esModuleInterop": true,
-    "noImplicitAny": true,
     "noUnusedLocals": true,
     "target": "es5",
     "lib": [
-      "es6", "dom"
+      "es2017", "dom"
     ]
   }
 }

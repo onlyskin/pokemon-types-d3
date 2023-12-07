@@ -2,19 +2,16 @@ import * as d3 from 'd3';
 import { INode } from './type_to_nodes';
 import { boundingDimensions, nodeRadius, IState } from './utils';
 import { tick } from './simulation';
-import { PokemonTypeDict } from './pokedex';
 
 export async function updateVisualisation(
     svg: Element,
     simulation: d3.Simulation<INode, undefined>,
     state: IState,
-    pokemonTypeDict: PokemonTypeDict,
+    nodes: INode[],
 ): Promise<void> {
     const { width, height } = boundingDimensions(svg);
     svg.setAttribute('width', width.toString());
     svg.setAttribute('height', height.toString());
-
-    const nodes = pokemonTypeDict[state.focusedType()];
 
     simulation.nodes(nodes);
     tick(simulation);
@@ -57,11 +54,8 @@ function updateCircles(
         .attr('cx', d => d.x * width)
         .attr('cy', d => d.y * height)
         .on('click', function(d) {
-            if (state.focusedType() === d.name) {
-                return;
-            }
-
-            state.setFocusedType(d.name);
+            state.setFirstType(d.name);
+            state.setSecondType(undefined);
             state.setHoveredNode(undefined);
             state.setActiveTransition(true);
         })

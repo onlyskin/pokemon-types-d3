@@ -1,4 +1,16 @@
-import { PokemonType, INode } from './type_to_nodes';
+import { INode } from './type_to_nodes';
+
+export type PokemonType = 'normal' | 'fire' | 'fighting' | 'water' | 'flying' | 'grass' | 'poison' | 'electric' | 'ground' | 'psychic' | 'rock' | 'ice' | 'bug' | 'dragon' | 'ghost' | 'dark' | 'steel' | 'fairy';
+
+export type PokemonDataDict = {[name: string]: PokemonData};
+
+export type PokemonTypeDict = {[key in PokemonType]: INode[]};
+
+export interface PokemonData {
+    name: string;
+    types: PokemonType[];
+    index: number;
+}
 
 export interface Result<T> {
     status: 'SUCCESS' | 'ERROR' | 'LOADING';
@@ -6,12 +18,23 @@ export interface Result<T> {
 }
 
 export interface IState {
-    focusedType: () => PokemonType;
     hoveredNode: INode | undefined;
     activeTransition: boolean;
-    setFocusedType: (newType: PokemonType) => undefined;
-    setHoveredNode: (newNode?: INode) => undefined;
-    setActiveTransition: (isActive: boolean) => undefined;
+    pokemonName: string;
+    pokemonInputText: string;
+    firstType: PokemonType;
+    firstTypeInputText: string;
+    secondType: PokemonType | undefined;
+    secondTypeInputText: string;
+
+    setHoveredNode: (newNode?: INode) => void;
+    setActiveTransition: (isActive: boolean) => void;
+    setPokemonName: (name: string) => void;
+    setPokemonInputText: (text: string) => void;
+    setFirstType: (newType: PokemonType) => void;
+    setFirstTypeInputText: (text: string) => void;
+    setSecondType: (newType: PokemonType) => void;
+    setSecondTypeInputText: (text: string) => void;
 }
 
 const NODE_SIZE_FACTOR = 0.03;

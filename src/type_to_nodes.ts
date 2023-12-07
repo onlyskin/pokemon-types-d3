@@ -1,6 +1,6 @@
-type Direction = 'from' | 'to';
+import { PokemonType, PokemonTypeDict, PokemonData } from './utils';
 
-export type PokemonType = 'normal' | 'fire' | 'fighting' | 'water' | 'flying' | 'grass' | 'poison' | 'electric' | 'ground' | 'psychic' | 'rock' | 'ice' | 'bug' | 'dragon' | 'ghost' | 'dark' | 'steel' | 'fairy';
+type Direction = 'from' | 'to';
 
 export interface INode extends d3.SimulationNodeDatum {
     name: PokemonType;
@@ -25,7 +25,7 @@ export interface ITypeResponse {
     };
 }
 
-export default (response: ITypeResponse): INode[] => {
+export function typeToNodes(response: ITypeResponse): INode[] {
     const x = [
         { key: 'half_damage_from', multiplier: 0.5, direction: 'from' },
         { key: 'no_damage_from', multiplier: 0, direction: 'from' },
@@ -33,7 +33,7 @@ export default (response: ITypeResponse): INode[] => {
         { key: 'double_damage_from', multiplier: 2, direction: 'from' },
         { key: 'no_damage_to', multiplier: 0, direction: 'to' },
         { key: 'double_damage_to', multiplier: 2, direction: 'to' },
-    ] as any[];
+    ];
 
     return x.reduce((acc, curr) => {
         const nodes: INode[] = response.damage_relations[curr.key].map((relation) => {
@@ -46,4 +46,26 @@ export default (response: ITypeResponse): INode[] => {
 
         return acc.concat(nodes);
     }, []);
+}
+
+export function nodesForPokemon(typeDict: PokemonTypeDict, pokemon: PokemonData): INode[] {
+    const combined: {[key in PokemonType]: number} = {} as {[key in PokemonType]: number};
+    pokemon.types.forEach(type => {
+        typeDict[type].forEach(node => {
+            if (node.direction === 'from') {
+                if (combined[node.name] === undefined) {
+                    combined[node.name] = 1;
+                }
+                combined[node.name] = combined[node.name] * node.multiplier;
+            }
+        });
+    });
+    const nodes: INode[] = Object.entries(combined)
+      .filter(([name, multiplier]) => multiplier !== 1)
+      .map(([name, multiplier]) => ({
+          name: name as PokemonType,
+          direction: 'from',
+          multiplier,
+      }));
+    return nodes;
 }

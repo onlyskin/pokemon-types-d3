@@ -10,7 +10,6 @@
   "dependencies": {
     "d3": "^5.5.0",
     "mithril": "^2.2.2",
-    "mithril-stream": "^2.0.0",
     "pokeapi-js-wrapper": "^1.1.1"
   },
   "devDependencies": {
