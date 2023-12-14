@@ -48,9 +48,9 @@ export function typeToNodes(response: ITypeResponse): INode[] {
     }, []);
 }
 
-export function nodesForPokemon(typeDict: PokemonTypeDict, pokemon: PokemonData): INode[] {
+export function nodesForTypes(typeDict: PokemonTypeDict, types: PokemonType[]): INode[] {
     const combined: {[key in PokemonType]: number} = {} as {[key in PokemonType]: number};
-    pokemon.types.forEach(type => {
+    types.forEach(type => {
         typeDict[type].forEach(node => {
             if (node.direction === 'from') {
                 if (combined[node.name] === undefined) {

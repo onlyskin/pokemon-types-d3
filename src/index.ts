@@ -1,6 +1,6 @@
 import m from 'mithril';
 import * as d3 from 'd3';
-import { INode } from './type_to_nodes';
+import { INode, nodesForTypes } from './type_to_nodes';
 import { updateVisualisation } from './update_visualisation';
 import { PokemonType, boundingDimensions, IState, PokemonTypeDict, PokemonDataDict } from './utils';
 import { forceSimulation } from './simulation';
@@ -12,11 +12,8 @@ class State implements IState {
 
     hoveredNode: INode | undefined;
     activeTransition: boolean;
-    pokemonName: string;
     pokemonInputText: string;
-    firstType: PokemonType;
     firstTypeInputText: string;
-    secondType: PokemonType | undefined;
     secondTypeInputText: string;
 
     constructor(pokemonTypeDict, pokemonDataDict) {
@@ -26,16 +23,22 @@ class State implements IState {
         this.activeTransition = false;
         this.hoveredNode = undefined;
 
-        const defaultPokemon = pokemonDataDict['bulbasaur'];
+        const routeParams = m.route.param();
+        this.pokemonInputText = routeParams['p'];
+        this.firstTypeInputText = routeParams['f'];
+        this.secondTypeInputText = routeParams['s'];
+    }
 
-        this.pokemonName = defaultPokemon.name;
-        this.pokemonInputText = defaultPokemon.name;
+    setRoute(newParams) {
+        this.setHoveredNode(undefined);
 
-        this.firstType = defaultPokemon.types[0];
-        this.firstTypeInputText = defaultPokemon.types[0];
+        const combinedParams = {...m.route.param(), ...newParams};
 
-        this.secondType = defaultPokemon.types[1];
-        this.secondTypeInputText = defaultPokemon.types[1];
+        this.pokemonInputText = combinedParams['p'];
+        this.firstTypeInputText = combinedParams['f'];
+        this.secondTypeInputText = combinedParams['s'];
+
+        m.route.set('/', combinedParams);
     }
 
     setActiveTransition(isActive: boolean) {
@@ -57,40 +60,33 @@ class State implements IState {
     }
 
     setPokemonName(name: string) {
-        if (name === undefined) {
-            this.pokemonName = undefined;
+        const newRouteParams = {};
+
+        if (name === undefined || name === '') {
+            newRouteParams['p'] = undefined;
             this.pokemonInputText = '';
-            m.redraw();
-        }
-        
-        const pokemon = this.pokemonDataDict[name];
-        if (pokemon !== undefined) {
-            this.pokemonName = pokemon.name;
-            this.pokemonInputText = pokemon.name;
+        } else {
+            const pokemon = this.pokemonDataDict[name];
+            if (pokemon !== undefined) {
+                this.pokemonInputText = pokemon.name;
+                newRouteParams['p'] = pokemon.name;
 
-            this.firstType = pokemon.types[0];
-            this.firstTypeInputText = this.firstType;
+                const firstType = pokemon.types[0];
+                newRouteParams['f'] = firstType;
+                this.firstTypeInputText = firstType;
 
-            if (pokemon.types.length === 2) {
-                this.secondType = pokemon.types[1];
-                this.secondTypeInputText = this.secondType;
-            } else {
-                this.secondType = undefined;
-                this.secondTypeInputText = '';
+                if (pokemon.types.length === 2) {
+                    const secondType = pokemon.types[1];
+                    newRouteParams['s'] = secondType;
+                    this.secondTypeInputText = secondType;
+                } else {
+                    newRouteParams['s'] = undefined;
+                    this.secondTypeInputText = '';
+                }
             }
-            m.redraw();
         }
-    }
 
-    setFirstType(type: string) {
-        if (this.pokemonTypeDict[type] !== undefined) {
-            this.firstType = type as PokemonType;
-            this.firstTypeInputText = type;
-
-            this.pokemonName = undefined;
-            this.pokemonInputText = '';
-            m.redraw();
-        }
+        this.setRoute(newRouteParams);
     }
 
     setFirstTypeInputText(text: string) {
@@ -98,14 +94,11 @@ class State implements IState {
         m.redraw();
     }
 
-    setSecondType(type: string) {
-        if (type === '' || type === undefined) {
-            this.secondType = undefined;
-            this.secondTypeInputText = '';
-        } else if (this.pokemonTypeDict[type] !== undefined) {
-            this.secondType = type as PokemonType;
-            this.secondTypeInputText = type;
-            m.redraw();
+    setFirstType(type: string) {
+        if (this.pokemonTypeDict[type] !== undefined) {
+            this.firstTypeInputText = type;
+
+            this.setRoute({'p': undefined, 'f': type});
         }
     }
 
@@ -113,11 +106,25 @@ class State implements IState {
         this.secondTypeInputText = text;
         m.redraw();
     }
+
+    setSecondType(type: string) {
+        const newRouteParams = {};
+        if (type === '' || type === undefined) {
+            newRouteParams['s'] = undefined;
+            this.secondTypeInputText = '';
+        } else if (this.pokemonTypeDict[type] !== undefined) {
+            this.secondTypeInputText = type;
+            newRouteParams['s'] = type;
+            newRouteParams['p'] = undefined;
+        }
+        this.setRoute(newRouteParams);
+    }
 };
 
 function visualisationTitle(state: IState): string {
     const hovered = state.hoveredNode;
-    const firstType = state.firstType;
+    const firstType = m.route.param()['f'];
+    const secondType = m.route.param()['s'];
 
     if (hovered === undefined) {
         return '';
@@ -128,7 +135,7 @@ function visualisationTitle(state: IState): string {
 
     if (hovered.direction === 'from') {
         attacking = hovered.name;
-        defending = firstType;
+        defending = `${firstType}${secondType ? '+' : ''}${secondType}`;
     } else {
         attacking = firstType;
         defending = hovered.name;
@@ -144,8 +151,9 @@ interface VisualisationAttrs {
     pokemonDataDict: PokemonDataDict;
 }
 
-const Visualisation: m.ClosureComponent<VisualisationAttrs> = function({attrs: {state}}) {
-    let oldFirst: PokemonType = state.firstType;
+const Visualisation: m.ClosureComponent<VisualisationAttrs> = function() {
+    let oldFirst: PokemonType = m.route.param()['f'];
+    let oldSecond: PokemonType = m.route.param()['s'];
 
     function domComputations(state: IState, dom: Element, pokemonDataDict: PokemonDataDict) {
         updateFocusedText(state, dom, pokemonDataDict);
@@ -157,7 +165,9 @@ const Visualisation: m.ClosureComponent<VisualisationAttrs> = function({attrs: {
         const el = dom.querySelector('#focused-text');
         el.setAttribute('x', (width * 0.5).toString());
         el.setAttribute('y', (height * 0.5).toString());
-        el.textContent = state.firstType;
+        const first = m.route.param()['f'];
+        const second = m.route.param()['s'];
+        el.textContent = `${first}${second ? '+' : ''}${second}`;
     }
 
     function updateTitle(state: IState, dom: Element) {
@@ -168,23 +178,33 @@ const Visualisation: m.ClosureComponent<VisualisationAttrs> = function({attrs: {
         el.textContent = visualisationTitle(state);
     }
 
+    function getNodes(pokemonTypeDict) {
+        const first = m.route.param()['f'] ;
+        const second = m.route.param()['s'] ;
+
+        if (second === undefined || second === '' || first === second) {
+            return pokemonTypeDict[first];
+        } else {
+            return nodesForTypes(pokemonTypeDict, [first, second]);
+        }
+    }
+
     return {
         oncreate: function({attrs: {simulation, state, pokemonTypeDict, pokemonDataDict}, dom}) {
-            const nodes = pokemonTypeDict[state.firstType];
-            //const nodes = nodesForPokemon(pokemonTypeDict, pokemonDataDict[state.pokemonName]);
-            updateVisualisation(dom, simulation, state, nodes);
+            updateVisualisation(dom, simulation, state, getNodes(pokemonTypeDict));
             domComputations(state, dom, pokemonDataDict);
         },
         onupdate: function({attrs: {simulation, state, pokemonTypeDict, pokemonDataDict}, dom}) {
-            const firstTypeUpdated = state.firstType !== oldFirst;
+            const newFirst = m.route.param()['f'] ;
+            const newSecond = m.route.param()['s'] ;
+            const typeUpdated = newFirst !== oldFirst || newSecond !== oldSecond;
 
-            if (firstTypeUpdated) {
-                const nodes = pokemonTypeDict[state.firstType];
-                //const nodes = nodesForPokemon(pokemonTypeDict, pokemonDataDict[state.pokemonName]);
-                updateVisualisation(dom, simulation, state, nodes);
+            if (typeUpdated) {
+                updateVisualisation(dom, simulation, state, getNodes(pokemonTypeDict));
             }
 
-            oldFirst = state.firstType;
+            oldFirst = newFirst;
+            oldSecond = newSecond;
             domComputations(state, dom, pokemonDataDict);
         },
         view: () => m(
@@ -193,8 +213,8 @@ const Visualisation: m.ClosureComponent<VisualisationAttrs> = function({attrs: {
                 version: '1',
                 xmlns: 'http://www.w3.org/2000/svg',
             },
-            m('text#focused-text', {}, 'bug'),
-            m('text#title-text', {}, 'bug'),
+            m('text#focused-text', {}, ''),
+            m('text#title-text', {}, ''),
         ),
     }
 };
@@ -204,64 +224,117 @@ window.addEventListener('resize', () => {
 });
 
 const simulation = forceSimulation();
-const resultPokedex = new ResultPokedex();
+const resultPokedex = new ResultPokedex(251, true);
 
-const PageInputs = {
-    view: ({attrs: {pokemonDataDict, pokemonTypeDict, state}}) => m(
-        '',
-        [
+const Sprite = {
+    view: ({ attrs: { pokemonData: { index, name, animated_artwork, official_artwork } } }) => {
+        const TARGET_SIZE = 60;
+        const artwork_url = official_artwork;
+
+        return m(
+            'a.black.no-underline.ba.br-pill.b--light-gray.pa2.ma2.shadow-4.bg-near-white',
+            {href: `https://bulbapedia.bulbagarden.net/wiki/${name}_(Pok%C3%A9mon)`},
             m(
-               'input',
-               {
-                   'type': 'search',
-                   'list': 'pokemon-list',
-                   'value': state.pokemonInputText,
-                   oninput: e => {
-                       state.setPokemonInputText(e.srcElement.value);
+                '.flex.justify-center.items-center.small-caps.f7.tc',
+                {
+                    'key': name,
+                    'title': name,
+                    'style': {
+                        'height': TARGET_SIZE,
+                        'width': TARGET_SIZE,
+                        'background': `url(${artwork_url}) left 0px top 0px`,
+                        'background-size': 'contain',
+                        'background-repeat': 'no-repeat',
+                        'background-position': 'center',
+                    },
+                },
+                artwork_url === null ? name : null, 
+            )
+        )
+    },
+}
+
+window.m = m;
+interface PageInputsAttrs {
+    pokemonTypeDict: PokemonTypeDict;
+    pokemonDataDict: PokemonDataDict;
+    state: IState;
+}
+const PageInputs: m.ClosureComponent<PageInputsAttrs> = function({attrs: {pokemonTypeDict, pokemonDataDict, state}}) {
+    return {
+            view: ({attrs: {pokemonDataDict, pokemonTypeDict, state}}) => m(
+            '',
+            [
+                m(
+                   'input',
+                   {
+                       'type': 'search',
+                       'list': 'pokemon-list',
+                       'value': state.pokemonInputText,
+                       oninput: e => {
+                           state.setPokemonInputText(e.srcElement.value);
+                       },
+                       onsearch: e => {
+                           state.setPokemonName(e.srcElement.value);
+                       },
                    },
-                   onsearch: e => {
-                       state.setPokemonName(e.srcElement.value);
+                ),
+                m(
+                    'datalist#pokemon-list',
+                    Object.keys(pokemonDataDict).map(name => m('option', {value: name}))
+                ),
+                m(
+                   'input',
+                   {
+                       'type': 'search',
+                       'list': 'types-list',
+                       'value': state.firstTypeInputText,
+                       oninput: e => {
+                           state.setFirstTypeInputText(e.srcElement.value);
+                       },
+                       onsearch: e => {
+                           state.setFirstType(e.srcElement.value);
+                       },
                    },
-               },
-            ),
-            m(
-                'datalist#pokemon-list',
-                Object.keys(pokemonDataDict).map(name => m('option', {value: name}))
-            ),
-            m(
-               'input',
-               {
-                   'type': 'search',
-                   'list': 'types-list',
-                   'value': state.firstTypeInputText,
-                   oninput: e => {
-                       state.setFirstTypeInputText(e.srcElement.value);
+                ),
+                m(
+                   'input',
+                   {
+                       'type': 'search',
+                       'list': 'types-list',
+                       'value': state.secondTypeInputText,
+                       oninput: e => {
+                           state.setSecondTypeInputText(e.srcElement.value);
+                       },
+                       onsearch: e => {
+                           state.setSecondType(e.srcElement.value);
+                       },
                    },
-                   onsearch: e => {
-                       state.setFirstType(e.srcElement.value);
-                   },
-               },
-            ),
-            m(
-               'input',
-               {
-                   'type': 'search',
-                   'list': 'types-list',
-                   'value': state.secondTypeInputText,
-                   oninput: e => {
-                       state.setSecondTypeInputText(e.srcElement.value);
-                   },
-                   onsearch: e => {
-                       state.setSecondType(e.srcElement.value);
-                   },
-               },
-            ),
-            m(
-                'datalist#types-list',
-                Object.keys(pokemonTypeDict).map(type => m('option', {value: type}))
-            ),
-        ],
-    ),
+                ),
+                m(
+                    'datalist#types-list',
+                    Object.keys(pokemonTypeDict).map(type => m('option', {value: type}))
+                ),
+                m(
+                    '.flex.flex-wrap',
+                    Object.values(pokemonDataDict)
+                      .filter(matchesRouteTypes)
+                      .map(pokemon => m(Sprite, {pokemonData: pokemon}))
+                ),
+            ],
+        ),
+    }
+}
+
+function matchesRouteTypes(pokemon: PokemonData): boolean {
+    const first = m.route.param()['f'];
+    const second = m.route.param()['s'];
+    if (second === undefined || second === '' || first === second) {
+        return pokemon.types[0] === first && pokemon.types[1] === undefined;
+    } else {
+        return pokemon.types[0] === first && pokemon.types[1] === second ||
+               pokemon.types[1] === first && pokemon.types[0] === second;
+    }
 }
 
 interface PageWithDataAttrs {
@@ -270,9 +343,22 @@ interface PageWithDataAttrs {
 }
 
 const PageWithData: m.ClosureComponent<PageWithDataAttrs> = function({attrs: {pokemonTypeDict, pokemonDataDict}}) {
-    const state = new State(pokemonTypeDict, pokemonDataDict);
+    let state;
 
     return {
+        oninit: () => {
+            state = new State(pokemonTypeDict, pokemonDataDict);
+            window.state = state;
+            const defaultPokemon = pokemonDataDict['bulbasaur'];
+            const firstType = defaultPokemon.types[0];
+            const secondType = defaultPokemon.types[1];
+
+            const currentParams = m.route.param();
+            const alreadyHasValidParams = currentParams['f'] || (currentParams['f'] && currentParams['s']);
+            if (!alreadyHasValidParams) {
+                m.route.set('/', {p: defaultPokemon.name, f: firstType, s: secondType})
+            }
+        },
         view: ({attrs: {pokemonTypeDict, pokemonDataDict}}) => [
             m(
                 Visualisation,
@@ -292,8 +378,9 @@ const PageWithData: m.ClosureComponent<PageWithDataAttrs> = function({attrs: {po
     };
 }
 
-m.mount(document.body, {
-    view: () => (resultPokedex.getTypeNodes().status === 'SUCCESS' &&
+m.route(document.body, '/', {
+    '/': {
+        view: () => (resultPokedex.getTypeNodes().status === 'SUCCESS' &&
                  resultPokedex.getPokemonData().status === 'SUCCESS') ?
                  m(
                      PageWithData,
@@ -301,5 +388,6 @@ m.mount(document.body, {
                          pokemonTypeDict: resultPokedex.getTypeNodes().value,
                          pokemonDataDict: resultPokedex.getPokemonData().value,
                      },
-    ) : null,
+        ) : null,
+    }
 });

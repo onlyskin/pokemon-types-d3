@@ -20,11 +20,8 @@ export interface Result<T> {
 export interface IState {
     hoveredNode: INode | undefined;
     activeTransition: boolean;
-    pokemonName: string;
     pokemonInputText: string;
-    firstType: PokemonType;
     firstTypeInputText: string;
-    secondType: PokemonType | undefined;
     secondTypeInputText: string;
 
     setHoveredNode: (newNode?: INode) => void;
@@ -35,6 +32,7 @@ export interface IState {
     setFirstTypeInputText: (text: string) => void;
     setSecondType: (newType: PokemonType) => void;
     setSecondTypeInputText: (text: string) => void;
+    setRoute: (params: any) => void;
 }
 
 const NODE_SIZE_FACTOR = 0.03;

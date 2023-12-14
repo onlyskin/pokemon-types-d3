@@ -9,7 +9,7 @@ svg circle:hover {
 
 #focused-text {
   font-family: 'Open Sans Condensed', sans-serif;
-  font-size: 10vw;
+  font-size: 5vw;
   text-anchor: middle;
   alignment-baseline: middle;
   user-select: none;

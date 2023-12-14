@@ -3,6 +3,7 @@
 SRC=src
 OUT=out
 ESBUILD=node_modules/.bin/esbuild
+TACHYONS=node_modules/tachyons/css/tachyons.min.css
 
 rm -rf $OUT
 mkdir -p $OUT
@@ -11,3 +12,4 @@ $ESBUILD $SRC/index.ts --bundle --minify --sourcemap --outfile=$OUT/index.bundle
 
 cp index.html $OUT/index.html
 cp css/* $OUT/
+cp $TACHYONS $OUT/
