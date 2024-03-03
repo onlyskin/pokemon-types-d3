@@ -24,6 +24,10 @@ export interface IState {
     firstTypeInputText: string;
     secondTypeInputText: string;
 
+    getPokemonName: () => string;
+    getFirstType: () => PokemonType;
+    getSecondType: () => PokemonType;
+
     setHoveredNode: (newNode?: INode) => void;
     setActiveTransition: (isActive: boolean) => void;
     setPokemonName: (name: string) => void;

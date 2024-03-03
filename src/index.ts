@@ -23,10 +23,16 @@ class State implements IState {
         this.activeTransition = false;
         this.hoveredNode = undefined;
 
-        const routeParams = m.route.param();
-        this.pokemonInputText = routeParams['p'];
-        this.firstTypeInputText = routeParams['f'];
-        this.secondTypeInputText = routeParams['s'];
+        const routeTypesAreValid = m.route.param('f') || m.route.param('f') && m.route.param('s');
+
+        if (!routeTypesAreValid) {
+            const defaultPokemon = pokemonDataDict['bulbasaur'];
+            m.route.set('/', {p: defaultPokemon.name, f: defaultPokemon.types[0], s: defaultPokemon.types[1]})
+        }
+
+        this.pokemonInputText = m.route.param('p');
+        this.firstTypeInputText = m.route.param('f');
+        this.secondTypeInputText = m.route.param('s');
     }
 
     setRoute(newParams) {
@@ -56,37 +62,43 @@ class State implements IState {
 
     setPokemonInputText(text: string) {
         this.pokemonInputText = text;
-        m.redraw();
     }
 
     setPokemonName(name: string) {
+        const pokemon = this.pokemonDataDict[name];
+
+        if (pokemon === undefined) {
+            return;
+        }
+
         const newRouteParams = {};
 
         if (name === undefined || name === '') {
             newRouteParams['p'] = undefined;
             this.pokemonInputText = '';
         } else {
-            const pokemon = this.pokemonDataDict[name];
-            if (pokemon !== undefined) {
-                this.pokemonInputText = pokemon.name;
-                newRouteParams['p'] = pokemon.name;
+            this.pokemonInputText = pokemon.name;
+            newRouteParams['p'] = pokemon.name;
 
-                const firstType = pokemon.types[0];
-                newRouteParams['f'] = firstType;
-                this.firstTypeInputText = firstType;
+            const firstType = pokemon.types[0];
+            newRouteParams['f'] = firstType;
+            this.firstTypeInputText = firstType;
 
-                if (pokemon.types.length === 2) {
-                    const secondType = pokemon.types[1];
-                    newRouteParams['s'] = secondType;
-                    this.secondTypeInputText = secondType;
-                } else {
-                    newRouteParams['s'] = undefined;
-                    this.secondTypeInputText = '';
-                }
+            if (pokemon.types.length === 2) {
+                const secondType = pokemon.types[1];
+                newRouteParams['s'] = secondType;
+                this.secondTypeInputText = secondType;
+            } else {
+                newRouteParams['s'] = undefined;
+                this.secondTypeInputText = '';
             }
         }
 
         this.setRoute(newRouteParams);
+    }
+
+    getPokemonName() {
+        return m.route.param('p');
     }
 
     setFirstTypeInputText(text: string) {
@@ -100,6 +112,10 @@ class State implements IState {
 
             this.setRoute({'p': undefined, 'f': type});
         }
+    }
+
+    getFirstType() {
+        return m.route.param()['f'];
     }
 
     setSecondTypeInputText(text: string) {
@@ -119,12 +135,16 @@ class State implements IState {
         }
         this.setRoute(newRouteParams);
     }
+
+    getSecondType() {
+        return m.route.param()['s'];
+    }
 };
 
 function visualisationTitle(state: IState): string {
     const hovered = state.hoveredNode;
-    const firstType = m.route.param()['f'];
-    const secondType = m.route.param()['s'];
+    const firstType = state.getFirstType();
+    const secondType = state.getSecondType();
 
     if (hovered === undefined) {
         return '';
@@ -151,9 +171,9 @@ interface VisualisationAttrs {
     pokemonDataDict: PokemonDataDict;
 }
 
-const Visualisation: m.ClosureComponent<VisualisationAttrs> = function() {
-    let oldFirst: PokemonType = m.route.param()['f'];
-    let oldSecond: PokemonType = m.route.param()['s'];
+const Visualisation: m.ClosureComponent<VisualisationAttrs> = function({attrs: {state}}) {
+    let oldFirst: PokemonType = state.getFirstType();
+    let oldSecond: PokemonType = state.getSecondType();
 
     function domComputations(state: IState, dom: Element, pokemonDataDict: PokemonDataDict) {
         updateFocusedText(state, dom, pokemonDataDict);
@@ -165,9 +185,7 @@ const Visualisation: m.ClosureComponent<VisualisationAttrs> = function() {
         const el = dom.querySelector('#focused-text');
         el.setAttribute('x', (width * 0.5).toString());
         el.setAttribute('y', (height * 0.5).toString());
-        const first = m.route.param()['f'];
-        const second = m.route.param()['s'];
-        el.textContent = `${first}${second ? '+' : ''}${second}`;
+        el.textContent = `${state.getFirstType()}${state.getSecondType() ? '+' : ''}${state.getSecondType()}`;
     }
 
     function updateTitle(state: IState, dom: Element) {
@@ -178,9 +196,9 @@ const Visualisation: m.ClosureComponent<VisualisationAttrs> = function() {
         el.textContent = visualisationTitle(state);
     }
 
-    function getNodes(pokemonTypeDict) {
-        const first = m.route.param()['f'] ;
-        const second = m.route.param()['s'] ;
+    function getNodes(pokemonTypeDict, state) {
+        const first = state.getFirstType();
+        const second = state.getSecondType();
 
         if (second === undefined || second === '' || first === second) {
             return pokemonTypeDict[first];
@@ -191,16 +209,16 @@ const Visualisation: m.ClosureComponent<VisualisationAttrs> = function() {
 
     return {
         oncreate: function({attrs: {simulation, state, pokemonTypeDict, pokemonDataDict}, dom}) {
-            updateVisualisation(dom, simulation, state, getNodes(pokemonTypeDict));
+            updateVisualisation(dom, simulation, state, getNodes(pokemonTypeDict, state));
             domComputations(state, dom, pokemonDataDict);
         },
         onupdate: function({attrs: {simulation, state, pokemonTypeDict, pokemonDataDict}, dom}) {
-            const newFirst = m.route.param()['f'] ;
-            const newSecond = m.route.param()['s'] ;
+            const newFirst = state.getFirstType();
+            const newSecond = state.getSecondType();
             const typeUpdated = newFirst !== oldFirst || newSecond !== oldSecond;
 
             if (typeUpdated) {
-                updateVisualisation(dom, simulation, state, getNodes(pokemonTypeDict));
+                updateVisualisation(dom, simulation, state, getNodes(pokemonTypeDict, state));
             }
 
             oldFirst = newFirst;
@@ -224,15 +242,16 @@ window.addEventListener('resize', () => {
 });
 
 const simulation = forceSimulation();
-const resultPokedex = new ResultPokedex(251, true);
+const resultPokedex = new ResultPokedex(151, false);
 
 const Sprite = {
-    view: ({ attrs: { pokemonData: { index, name, animated_artwork, official_artwork } } }) => {
+    view: ({ attrs: { pokemonData: { index, name, animated_artwork, official_artwork }, state } }) => {
         const TARGET_SIZE = 60;
         const artwork_url = official_artwork;
+        const isFocused = state.getPokemonName() === name;
 
         return m(
-            'a.black.no-underline.ba.br-pill.b--light-gray.pa2.ma2.shadow-4.bg-near-white',
+            `a.black.no-underline.ba.br-pill${isFocused ? '.b--light-green.bg-washed-green' : '.b--light-gray.bg-near-white'}.pa2.ma2.shadow-4`,
             {href: `https://bulbapedia.bulbagarden.net/wiki/${name}_(Pok%C3%A9mon)`},
             m(
                 '.flex.justify-center.items-center.small-caps.f7.tc',
@@ -318,17 +337,17 @@ const PageInputs: m.ClosureComponent<PageInputsAttrs> = function({attrs: {pokemo
                 m(
                     '.flex.flex-wrap',
                     Object.values(pokemonDataDict)
-                      .filter(matchesRouteTypes)
-                      .map(pokemon => m(Sprite, {pokemonData: pokemon}))
+                      .filter(pokemon => matchesRouteTypes(pokemon, state))
+                      .map(pokemon => m(Sprite, {pokemonData: pokemon, state}))
                 ),
             ],
         ),
     }
 }
 
-function matchesRouteTypes(pokemon: PokemonData): boolean {
-    const first = m.route.param()['f'];
-    const second = m.route.param()['s'];
+function matchesRouteTypes(pokemon: PokemonData, state: IState): boolean {
+    const first = state.getFirstType();
+    const second = state.getSecondType();
     if (second === undefined || second === '' || first === second) {
         return pokemon.types[0] === first && pokemon.types[1] === undefined;
     } else {
@@ -348,16 +367,6 @@ const PageWithData: m.ClosureComponent<PageWithDataAttrs> = function({attrs: {po
     return {
         oninit: () => {
             state = new State(pokemonTypeDict, pokemonDataDict);
-            window.state = state;
-            const defaultPokemon = pokemonDataDict['bulbasaur'];
-            const firstType = defaultPokemon.types[0];
-            const secondType = defaultPokemon.types[1];
-
-            const currentParams = m.route.param();
-            const alreadyHasValidParams = currentParams['f'] || (currentParams['f'] && currentParams['s']);
-            if (!alreadyHasValidParams) {
-                m.route.set('/', {p: defaultPokemon.name, f: firstType, s: secondType})
-            }
         },
         view: ({attrs: {pokemonTypeDict, pokemonDataDict}}) => [
             m(
