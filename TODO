@@ -1,10 +1,10 @@
 TODO
-- extract page state/model object
-- build effectiveness calculator which gets injected with the data
-  - returns effectiveness data for one type or two types
-
 - fix window resizing bug (caused by only updating nodes if the type has changed)
 - make no damage ones show up
+- show the inidividual type layouts as well as what they add up to (e.g. bulbasaur show grass visualisation, poison visualisation, and combined)
+- filter pokemon to the types
+- load in pokedexes one by one instead of whole of national?
+- extract multiple force layouts rather than one big one (?)
 
 nice to have:
 - optionally also add 1x type bubbles (toggleable)

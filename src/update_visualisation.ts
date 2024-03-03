@@ -54,7 +54,8 @@ function updateCircles(
         .attr('cx', d => d.x * width)
         .attr('cy', d => d.y * height)
         .on('click', function(d) {
-            state.setRoute({'p': undefined, 'f': d.name, 's': undefined});
+            state.setFirstType(d.name);
+            state.setSecondType('');
             state.setActiveTransition(true);
         })
         .on('mouseover', d => {

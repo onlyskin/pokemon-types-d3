@@ -12,39 +12,42 @@ class State implements IState {
 
     hoveredNode: INode | undefined;
     activeTransition: boolean;
-    pokemonInputText: string;
-    firstTypeInputText: string;
-    secondTypeInputText: string;
+    pokemonName: string;
+    firstType: string;
+    secondType: string;
+    generation: number;
 
     constructor(pokemonTypeDict, pokemonDataDict) {
+        this.generation = 0;
         this.pokemonTypeDict = pokemonTypeDict;
         this.pokemonDataDict = pokemonDataDict;
 
         this.activeTransition = false;
         this.hoveredNode = undefined;
 
-        const routeTypesAreValid = m.route.param('f') || m.route.param('f') && m.route.param('s');
+        this.pokemonName = 'bulbasaur';
+        this.firstType = 'grass';
+        this.secondType = 'poison';
 
-        if (!routeTypesAreValid) {
-            const defaultPokemon = pokemonDataDict['bulbasaur'];
-            m.route.set('/', {p: defaultPokemon.name, f: defaultPokemon.types[0], s: defaultPokemon.types[1]})
-        }
-
-        this.pokemonInputText = m.route.param('p');
-        this.firstTypeInputText = m.route.param('f');
-        this.secondTypeInputText = m.route.param('s');
+        this.trySyncFromRoute();
     }
 
-    setRoute(newParams) {
-        this.setHoveredNode(undefined);
+    trySyncFromRoute() {
+        const pokemonName = m.route.param('p') || '';
+        const firstType = m.route.param('f') || '';
+        const secondType = m.route.param('s') || '';
 
-        const combinedParams = {...m.route.param(), ...newParams};
+        if (pokemonName !== '') {
+            this.setPokemonName(pokemonName);
+        } else if (firstType !== '' && secondType !== '') {
+            this.setFirstType(firstType);
+            this.setSecondType(secondType);
+        } else if (firstType !== '') {
+            this.setFirstType(firstType);
+            this.setSecondType('');
+        }
 
-        this.pokemonInputText = combinedParams['p'];
-        this.firstTypeInputText = combinedParams['f'];
-        this.secondTypeInputText = combinedParams['s'];
-
-        m.route.set('/', combinedParams);
+        this.syncState();
     }
 
     setActiveTransition(isActive: boolean) {
@@ -60,8 +63,21 @@ class State implements IState {
         }
     }
 
-    setPokemonInputText(text: string) {
-        this.pokemonInputText = text;
+    syncState() {
+        this.generation++;
+
+        const newParams = {};
+        if (this.pokemonName !== '') {
+            newParams['p'] = this.pokemonName;
+        }
+        if (this.firstType !== '') {
+            newParams['f'] = this.firstType;
+        }
+        if (this.secondType !== '') {
+            newParams['s'] = this.secondType;
+        }
+
+        m.route.set('/', newParams);
     }
 
     setPokemonName(name: string) {
@@ -71,80 +87,38 @@ class State implements IState {
             return;
         }
 
-        const newRouteParams = {};
-
-        if (name === undefined || name === '') {
-            newRouteParams['p'] = undefined;
-            this.pokemonInputText = '';
-        } else {
-            this.pokemonInputText = pokemon.name;
-            newRouteParams['p'] = pokemon.name;
-
-            const firstType = pokemon.types[0];
-            newRouteParams['f'] = firstType;
-            this.firstTypeInputText = firstType;
-
-            if (pokemon.types.length === 2) {
-                const secondType = pokemon.types[1];
-                newRouteParams['s'] = secondType;
-                this.secondTypeInputText = secondType;
-            } else {
-                newRouteParams['s'] = undefined;
-                this.secondTypeInputText = '';
-            }
-        }
-
-        this.setRoute(newRouteParams);
-    }
-
-    getPokemonName() {
-        return m.route.param('p');
-    }
-
-    setFirstTypeInputText(text: string) {
-        this.firstTypeInputText = text;
-        m.redraw();
+        this.pokemonName = name;
+        this.firstType = pokemon.types[0];
+        this.secondType = pokemon.types[1] === undefined ? '' : pokemon.types[1];
+        this.syncState();
     }
 
     setFirstType(type: string) {
-        if (this.pokemonTypeDict[type] !== undefined) {
-            this.firstTypeInputText = type;
-
-            this.setRoute({'p': undefined, 'f': type});
+        // first type can never be unset
+        if (type !== '' && this.pokemonTypeDict[type] !== undefined) {
+            this.firstType = type;
+            this.pokemonName = '';
+            this.syncState();
         }
-    }
-
-    getFirstType() {
-        return m.route.param()['f'];
-    }
-
-    setSecondTypeInputText(text: string) {
-        this.secondTypeInputText = text;
-        m.redraw();
     }
 
     setSecondType(type: string) {
-        const newRouteParams = {};
-        if (type === '' || type === undefined) {
-            newRouteParams['s'] = undefined;
-            this.secondTypeInputText = '';
+        if (type === '') {
+            this.secondType = '';
+            this.pokemonName = '';
+            this.syncState();
         } else if (this.pokemonTypeDict[type] !== undefined) {
-            this.secondTypeInputText = type;
-            newRouteParams['s'] = type;
-            newRouteParams['p'] = undefined;
+            this.secondType = type;
+            this.pokemonName = '';
+            this.syncState();
         }
-        this.setRoute(newRouteParams);
-    }
-
-    getSecondType() {
-        return m.route.param()['s'];
     }
 };
 
 function visualisationTitle(state: IState): string {
     const hovered = state.hoveredNode;
-    const firstType = state.getFirstType();
-    const secondType = state.getSecondType();
+    const firstType = state.firstType;
+    const secondType = state.secondType;
 
     if (hovered === undefined) {
         return '';
@@ -172,8 +146,8 @@ interface VisualisationAttrs {
 }
 
 const Visualisation: m.ClosureComponent<VisualisationAttrs> = function({attrs: {state}}) {
-    let oldFirst: PokemonType = state.getFirstType();
-    let oldSecond: PokemonType = state.getSecondType();
+    let oldFirst: PokemonType = state.firstType;
+    let oldSecond: PokemonType = state.secondType;
 
     function domComputations(state: IState, dom: Element, pokemonDataDict: PokemonDataDict) {
         updateFocusedText(state, dom, pokemonDataDict);
@@ -185,7 +159,7 @@ const Visualisation: m.ClosureComponent<VisualisationAttrs> = function({attrs: {
         const el = dom.querySelector('#focused-text');
         el.setAttribute('x', (width * 0.5).toString());
         el.setAttribute('y', (height * 0.5).toString());
-        el.textContent = `${state.getFirstType()}${state.getSecondType() ? '+' : ''}${state.getSecondType()}`;
+        el.textContent = `${state.firstType}${state.secondType ? '+' : ''}${state.secondType}`;
     }
 
     function updateTitle(state: IState, dom: Element) {
@@ -197,8 +171,8 @@ const Visualisation: m.ClosureComponent<VisualisationAttrs> = function({attrs: {
     }
 
     function getNodes(pokemonTypeDict, state) {
-        const first = state.getFirstType();
-        const second = state.getSecondType();
+        const first = state.firstType;
+        const second = state.secondType;
 
         if (second === undefined || second === '' || first === second) {
             return pokemonTypeDict[first];
@@ -213,8 +187,8 @@ const Visualisation: m.ClosureComponent<VisualisationAttrs> = function({attrs: {
             domComputations(state, dom, pokemonDataDict);
         },
         onupdate: function({attrs: {simulation, state, pokemonTypeDict, pokemonDataDict}, dom}) {
-            const newFirst = state.getFirstType();
-            const newSecond = state.getSecondType();
+            const newFirst = state.firstType;
+            const newSecond = state.secondType;
             const typeUpdated = newFirst !== oldFirst || newSecond !== oldSecond;
 
             if (typeUpdated) {
@@ -248,7 +222,7 @@ const Sprite = {
     view: ({ attrs: { pokemonData: { index, name, animated_artwork, official_artwork }, state } }) => {
         const TARGET_SIZE = 60;
         const artwork_url = official_artwork;
-        const isFocused = state.getPokemonName() === name;
+        const isFocused = state.pokemonName === name;
 
         return m(
             `a.black.no-underline.ba.br-pill${isFocused ? '.b--light-green.bg-washed-green' : '.b--light-gray.bg-near-white'}.pa2.ma2.shadow-4`,
@@ -273,6 +247,31 @@ const Sprite = {
     },
 }
 
+const SearchInput = {
+    oncreate({ attrs, dom }) {
+        if (attrs.forceValue) {
+            dom.value = attrs.forceValue;
+        }
+        this.generation = attrs.generation;
+    },
+    onupdate({ attrs, dom }) {
+        if (this.generation !== attrs.generation) {
+            dom.value = attrs.forceValue;
+            this.generation = attrs.generation;
+        }
+    },
+    view({ attrs: {state, dataListName, onsearch} }) {
+        return m(
+            'input',
+            {
+                'type': 'search',
+                'list': dataListName,
+                onsearch,
+            },
+        );
+    },
+}
+
 window.m = m;
 interface PageInputsAttrs {
     pokemonTypeDict: PokemonTypeDict;
@@ -284,51 +283,36 @@ const PageInputs: m.ClosureComponent<PageInputsAttrs> = function({attrs: {pokemo
             view: ({attrs: {pokemonDataDict, pokemonTypeDict, state}}) => m(
             '',
             [
-                m(
-                   'input',
-                   {
-                       'type': 'search',
-                       'list': 'pokemon-list',
-                       'value': state.pokemonInputText,
-                       oninput: e => {
-                           state.setPokemonInputText(e.srcElement.value);
-                       },
-                       onsearch: e => {
-                           state.setPokemonName(e.srcElement.value);
-                       },
-                   },
-                ),
+                m(SearchInput, {
+                    state,
+                    forceValue: state.pokemonName,
+                    generation: state.generation,
+                    dataListName: 'pokemon-list',
+                    onsearch: e => {
+                        state.setPokemonName(e.srcElement.value);
+                    },
+                }),
+                m(SearchInput, {
+                    state,
+                    forceValue: state.firstType,
+                    generation: state.generation,
+                    dataListName: 'types-list',
+                    onsearch: e => {
+                        state.setFirstType(e.srcElement.value);
+                    },
+                }),
+                m(SearchInput, {
+                    state,
+                    forceValue: state.secondType,
+                    generation: state.generation,
+                    dataListName: 'types-list',
+                    onsearch: e => {
+                        state.setSecondType(e.srcElement.value);
+                    },
+                }),
                 m(
                     'datalist#pokemon-list',
                     Object.keys(pokemonDataDict).map(name => m('option', {value: name}))
-                ),
-                m(
-                   'input',
-                   {
-                       'type': 'search',
-                       'list': 'types-list',
-                       'value': state.firstTypeInputText,
-                       oninput: e => {
-                           state.setFirstTypeInputText(e.srcElement.value);
-                       },
-                       onsearch: e => {
-                           state.setFirstType(e.srcElement.value);
-                       },
-                   },
-                ),
-                m(
-                   'input',
-                   {
-                       'type': 'search',
-                       'list': 'types-list',
-                       'value': state.secondTypeInputText,
-                       oninput: e => {
-                           state.setSecondTypeInputText(e.srcElement.value);
-                       },
-                       onsearch: e => {
-                           state.setSecondType(e.srcElement.value);
-                       },
-                   },
                 ),
                 m(
                     'datalist#types-list',
@@ -346,8 +330,8 @@ const PageInputs: m.ClosureComponent<PageInputsAttrs> = function({attrs: {pokemo
 }
 
 function matchesRouteTypes(pokemon: PokemonData, state: IState): boolean {
-    const first = state.getFirstType();
-    const second = state.getSecondType();
+    const first = state.firstType;
+    const second = state.secondType;
     if (second === undefined || second === '' || first === second) {
         return pokemon.types[0] === first && pokemon.types[1] === undefined;
     } else {
@@ -363,10 +347,17 @@ interface PageWithDataAttrs {
 
 const PageWithData: m.ClosureComponent<PageWithDataAttrs> = function({attrs: {pokemonTypeDict, pokemonDataDict}}) {
     let state;
+    let previousParams = {};
 
     return {
         oninit: () => {
             state = new State(pokemonTypeDict, pokemonDataDict);
+        },
+        onupdate: () => {
+            if (JSON.stringify(m.route.param()) !== JSON.stringify(previousParams)) {
+                state.trySyncFromRoute();
+                previousParams = m.route.param();
+            }
         },
         view: ({attrs: {pokemonTypeDict, pokemonDataDict}}) => [
             m(
