@@ -39,10 +39,22 @@ export interface IState {
     setRoute: (params: any) => void;
 }
 
-const NODE_SIZE_FACTOR = 0.03;
+const NODE_SIZE_FACTOR = 0.07;
 
 export function nodeRadius(node: INode): number {
-    return (node.multiplier === 0 ? 0.1 : node.multiplier) * NODE_SIZE_FACTOR;
+    let radius = 1;
+    if (node.multiplier === 0 ) {
+        radius = 0.1;
+    } else if (node.multiplier === 0.25) {
+        radius = 0.5;
+    } else if (node.multiplier === 0.5) {
+        radius = 1 / Math.sqrt(2);
+    } else if (node.multiplier === 2) {
+        radius = Math.sqrt(2);
+    } else if (node.multiplier === 4) {
+        radius = 2;
+    }
+    return radius * NODE_SIZE_FACTOR;
 }
 
 export function boundingDimensions(svg: Element) {
