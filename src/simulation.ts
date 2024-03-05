@@ -3,8 +3,8 @@ import { INode } from './type_to_nodes';
 import { nodeRadius } from './utils';
 
 const NODE_SPACING_FACTOR = 0.005;
-const CENTRE_REPULSION = -0.03;
-const X_STRENGTH = 0.3;
+const CENTRE_REPULSION = -0.01;
+const X_STRENGTH = 0.7;
 
 export function forceSimulation(): d3.Simulation<INode, undefined> {
     const collisionForce = d3.forceCollide<INode>(d => {

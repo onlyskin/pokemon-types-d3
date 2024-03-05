@@ -200,7 +200,7 @@ const Visualisation: m.ClosureComponent<VisualisationAttrs> = function({attrs: {
             domComputations(state, dom, pokemonDataDict);
         },
         view: () => m(
-            'svg',
+            'svg.w-100.h-100',
             {
                 version: '1',
                 xmlns: 'http://www.w3.org/2000/svg',
@@ -262,7 +262,7 @@ const SearchInput = {
     },
     view({ attrs: {state, dataListName, onsearch} }) {
         return m(
-            'input',
+            'input.ma1.pa1.br3.small-caps',
             {
                 'type': 'search',
                 'list': dataListName,
@@ -283,15 +283,17 @@ const PageInputs: m.ClosureComponent<PageInputsAttrs> = function({attrs: {pokemo
             view: ({attrs: {pokemonDataDict, pokemonTypeDict, state}}) => m(
             '',
             [
-                m(SearchInput, {
-                    state,
-                    forceValue: state.pokemonName,
-                    generation: state.generation,
-                    dataListName: 'pokemon-list',
-                    onsearch: e => {
-                        state.setPokemonName(e.srcElement.value);
-                    },
-                }),
+                m('',
+                    m(SearchInput, {
+                        state,
+                        forceValue: state.pokemonName,
+                        generation: state.generation,
+                        dataListName: 'pokemon-list',
+                        onsearch: e => {
+                            state.setPokemonName(e.srcElement.value);
+                        },
+                    }),
+                ),
                 m(SearchInput, {
                     state,
                     forceValue: state.firstType,
@@ -312,11 +314,11 @@ const PageInputs: m.ClosureComponent<PageInputsAttrs> = function({attrs: {pokemo
                 }),
                 m(
                     'datalist#pokemon-list',
-                    Object.keys(pokemonDataDict).map(name => m('option', {value: name}))
+                    Object.keys(pokemonDataDict).map(name => m('option.small-caps', {value: name}))
                 ),
                 m(
                     'datalist#types-list',
-                    Object.keys(pokemonTypeDict).map(type => m('option', {value: type}))
+                    Object.keys(pokemonTypeDict).map(type => m('option.small-caps', {value: type}))
                 ),
                 m(
                     '.flex.flex-wrap',
@@ -361,13 +363,16 @@ const PageWithData: m.ClosureComponent<PageWithDataAttrs> = function({attrs: {po
         },
         view: ({attrs: {pokemonTypeDict, pokemonDataDict}}) => [
             m(
-                Visualisation,
-                {
-                    state,
-                    simulation,
-                    pokemonTypeDict: resultPokedex.getTypeNodes().value,
-                    pokemonDataDict: resultPokedex.getPokemonData().value,
-                }
+                '.pa2.w-100.h-75',
+                m(
+                    Visualisation,
+                    {
+                        state,
+                        simulation,
+                        pokemonTypeDict: resultPokedex.getTypeNodes().value,
+                        pokemonDataDict: resultPokedex.getPokemonData().value,
+                    }
+                ),
             ),
             m(PageInputs, {
                 state,
