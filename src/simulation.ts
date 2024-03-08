@@ -2,24 +2,35 @@ import * as d3 from 'd3';
 import { INode } from './type_to_nodes';
 import { nodeRadius } from './utils';
 
-const NODE_SPACING_FACTOR = 0.005;
-const CENTRE_REPULSION = -0.01;
-const X_STRENGTH = 0.7;
+const NODE_SPACING_FACTOR = 0.004;
 
 export function forceSimulation(): d3.Simulation<INode, undefined> {
     const collisionForce = d3.forceCollide<INode>(d => {
         return nodeRadius(d) + NODE_SPACING_FACTOR;
     });
 
-    const xForce = d3.forceX<INode>(d => {
-        return d.direction === 'from' ? 0.25 : 0.75;
-    }).strength(X_STRENGTH);
+    const boxingForce = (() => {
+        const f = function(alpha) {
+            for (let node of f.nodes) {
+                const padding = 0.01;
+                const radius = nodeRadius(node) + padding;
+                node.x = Math.max(radius, Math.min(node.x, 1-radius));
+                node.y = Math.max(radius, Math.min(node.y, 1-radius));
+            }
+        };
+        f.nodes = [];
+        f.initialize = (new_nodes) => {
+            f.nodes = new_nodes;
+        }
+        return f;
+    })();
 
     return d3.forceSimulation<INode>()
         .force("collision", collisionForce)
-        .force("x", xForce)
-        .force("antiCenter", d3.forceX<INode>(0.5).strength(CENTRE_REPULSION))
-        .force("y", d3.forceY(0.5))
+        .force("x", d3.forceX<INode>(d => d.direction === 'from' ? 0.2 : 0.8)
+               .strength(1.2))
+        .force("y", d3.forceY(0.5).strength(0.08))
+        .force("bounds", boxingForce)
         .stop();
 }
 

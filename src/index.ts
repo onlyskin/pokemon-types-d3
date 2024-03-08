@@ -156,9 +156,10 @@ const Visualisation: m.ClosureComponent<VisualisationAttrs> = function({attrs: {
 
     function updateFocusedText(state: IState, dom: Element, pokemonDataDict: PokemonDataDict) {
         const {height, width} = boundingDimensions(dom);
+        const position = Math.min(height, width);
         const el = dom.querySelector('#focused-text');
-        el.setAttribute('x', (width * 0.5).toString());
-        el.setAttribute('y', (height * 0.5).toString());
+        el.setAttribute('x', (position * 0.5).toString());
+        el.setAttribute('y', (position * 0.5).toString());
         el.textContent = `${state.firstType}${state.secondType ? '+' : ''}${state.secondType}`;
     }
 
@@ -200,13 +201,15 @@ const Visualisation: m.ClosureComponent<VisualisationAttrs> = function({attrs: {
             domComputations(state, dom, pokemonDataDict);
         },
         view: () => m(
-            'svg.w-100.h-100',
+            'svg',
             {
+                width: 300,
+                height: 300,
                 version: '1',
                 xmlns: 'http://www.w3.org/2000/svg',
             },
-            m('text#focused-text', {}, ''),
             m('text#title-text', {}, ''),
+            m('text#focused-text.f3.small-caps', {}, ''),
         ),
     }
 };
@@ -363,16 +366,13 @@ const PageWithData: m.ClosureComponent<PageWithDataAttrs> = function({attrs: {po
         },
         view: ({attrs: {pokemonTypeDict, pokemonDataDict}}) => [
             m(
-                '.pa2.w-100.h-75',
-                m(
-                    Visualisation,
-                    {
-                        state,
-                        simulation,
-                        pokemonTypeDict: resultPokedex.getTypeNodes().value,
-                        pokemonDataDict: resultPokedex.getPokemonData().value,
-                    }
-                ),
+                Visualisation,
+                {
+                    state,
+                    simulation,
+                    pokemonTypeDict: resultPokedex.getTypeNodes().value,
+                    pokemonDataDict: resultPokedex.getPokemonData().value,
+                }
             ),
             m(PageInputs, {
                 state,

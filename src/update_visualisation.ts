@@ -49,10 +49,12 @@ function updateCircles(
     const exitingNodes = updatingNodes
         .exit();
 
+    const mappingFactor = Math.min(width, height);
+
     enteringNodes
         .attr('class', d => d.name)
-        .attr('cx', d => d.x * width)
-        .attr('cy', d => d.y * height)
+        .attr('cx', d => d.x * mappingFactor)
+        .attr('cy', d => d.y * mappingFactor)
         .on('click', function(d) {
             state.setFirstType(d.name);
             state.setSecondType('');
@@ -71,9 +73,9 @@ function updateCircles(
 
     mergedNodes
         .transition(nodeTransition)
-        .attr('cx', d => d.x * width)
-        .attr('cy', d => d.y * height)
-        .attr('r', d => nodeRadius(d) * Math.min(width, height));
+        .attr('cx', d => d.x * mappingFactor)
+        .attr('cy', d => d.y * mappingFactor)
+        .attr('r', d => nodeRadius(d) * mappingFactor);
 
     exitingNodes
         .transition(nodeTransition)
