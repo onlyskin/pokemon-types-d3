@@ -222,7 +222,7 @@ window.addEventListener('resize', () => {
 });
 
 const simulation = forceSimulation();
-const resultPokedex = new ResultPokedex(151, false);
+const resultPokedex = new ResultPokedex(251, true);
 
 const Sprite = {
     view: ({ attrs: { pokemonData: { index, name, animated_artwork, official_artwork }, state } }) => {
