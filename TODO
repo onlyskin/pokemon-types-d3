@@ -1,12 +1,15 @@
-TODO
-- fix window resizing bug (caused by only updating nodes if the type has changed)
-- make no damage ones show up
+TODO before release
+- add text to bubbles saying 2x, 4x, ½x, ¼x, 0x
+
+next:
+- generate all 151 force vis to check they work with force params
 - show the inidividual type layouts as well as what they add up to (e.g. bulbasaur show grass visualisation, poison visualisation, and combined)
-- filter pokemon to the types
-- load in pokedexes one by one instead of whole of national?
-- extract multiple force layouts rather than one big one (?)
+- extract a force layout component
+- make multiple little separate visualisatons with almost like sentences
+- let user scroll through by pokedex number (or just have pokedex view with list of all pokemon in order with their little force layout)
 
 nice to have:
+- load in pokedexes one by one instead of whole of national?
 - optionally also add 1x type bubbles (toggleable)
     - Just supply as nodes to the visualisation <- the forceSimulation factory function
         should know whether 1x is included or not
