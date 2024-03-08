@@ -135,7 +135,10 @@ function visualisationTitle(state: IState): string {
         defending = hovered.name;
     }
 
-    return `${attacking} gets ${hovered.multiplier}x against ${defending}`;
+    const { multiplier } = hovered;
+    const multiplierText = multiplier === 0.5 ? '½' : multiplier === 0.25 ? '¼' : multiplier;
+
+    return `${attacking} gets ${multiplierText}x against ${defending}`;
 }
 
 interface VisualisationAttrs {
