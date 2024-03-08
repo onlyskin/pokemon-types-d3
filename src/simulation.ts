@@ -29,7 +29,7 @@ export function forceSimulation(): d3.Simulation<INode, undefined> {
         .force("collision", collisionForce)
         .force("x", d3.forceX<INode>(d => d.direction === 'from' ? 0.2 : 0.8)
                .strength(1.2))
-        .force("y", d3.forceY(0.5).strength(0.08))
+        .force("y", d3.forceY(0.6).strength(0.08))
         .force("bounds", boxingForce)
         .stop();
 }

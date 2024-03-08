@@ -4,7 +4,6 @@ svg circle:hover {
 
 #focused-text {
   font-family: 'Open Sans Condensed', sans-serif;
-  font-size: 5vw;
   text-anchor: middle;
   alignment-baseline: middle;
   user-select: none;
@@ -12,7 +11,6 @@ svg circle:hover {
 
 #title-text {
   font-family: 'Open Sans Condensed', sans-serif;
-  font-size: 4vw;
   text-anchor: middle;
   alignment-baseline: middle;
   user-select: none;

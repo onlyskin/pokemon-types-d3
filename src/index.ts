@@ -208,7 +208,7 @@ const Visualisation: m.ClosureComponent<VisualisationAttrs> = function({attrs: {
                 version: '1',
                 xmlns: 'http://www.w3.org/2000/svg',
             },
-            m('text#title-text', {}, ''),
+            m('text#title-text.f5', {}, ''),
             m('text#focused-text.f3.small-caps', {}, ''),
         ),
     }
