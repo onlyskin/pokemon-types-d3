@@ -266,13 +266,14 @@ const SearchInput = {
             this.generation = attrs.generation;
         }
     },
-    view({ attrs: {state, dataListName, onsearch} }) {
+    view({ attrs: {state, dataListName, onsearch, onchange} }) {
         return m(
             'input.ma1.pa1.br3.small-caps',
             {
                 'type': 'search',
                 'list': dataListName,
                 onsearch,
+                onchange,
             },
         );
     },
@@ -296,6 +297,9 @@ const PageInputs: m.ClosureComponent<PageInputsAttrs> = function({attrs: {pokemo
                         generation: state.generation,
                         dataListName: 'pokemon-list',
                         onsearch: e => {
+                            state.setPokemonName(e.srcElement.value);
+                        },
+                        onchange: e => {
                             state.setPokemonName(e.srcElement.value);
                         },
                     }),
