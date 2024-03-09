@@ -2,15 +2,17 @@ svg circle:hover {
   stroke-width: 3px;
 }
 
-#focused-text {
+.open-sans {
   font-family: 'Open Sans Condensed', sans-serif;
+}
+
+#focused-text {
   text-anchor: middle;
   alignment-baseline: middle;
   user-select: none;
 }
 
 #title-text {
-  font-family: 'Open Sans Condensed', sans-serif;
   text-anchor: middle;
   alignment-baseline: middle;
   user-select: none;

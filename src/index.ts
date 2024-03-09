@@ -211,8 +211,8 @@ const Visualisation: m.ClosureComponent<VisualisationAttrs> = function({attrs: {
                 version: '1',
                 xmlns: 'http://www.w3.org/2000/svg',
             },
-            m('text#title-text.f5', {}, ''),
-            m('text#focused-text.f3.small-caps', {}, ''),
+            m('text#title-text.open-sans.f5', {}, ''),
+            m('text#focused-text.open-sans.f3.small-caps', {}, ''),
         ),
     }
 };
@@ -386,6 +386,10 @@ const PageWithData: m.ClosureComponent<PageWithDataAttrs> = function({attrs: {po
     };
 }
 
+const LoadingPage = {
+    view: () => m('.flex.h-100.items-center.open-sans.f3', 'Loading'),
+};
+
 m.route(document.body, '/', {
     '/': {
         view: () => (resultPokedex.getTypeNodes().status === 'SUCCESS' &&
@@ -396,6 +400,6 @@ m.route(document.body, '/', {
                          pokemonTypeDict: resultPokedex.getTypeNodes().value,
                          pokemonDataDict: resultPokedex.getPokemonData().value,
                      },
-        ) : null,
-    }
+        ) : m(LoadingPage),
+    },
 });
