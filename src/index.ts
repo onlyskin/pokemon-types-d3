@@ -217,16 +217,52 @@ const Visualisation: m.ClosureComponent<VisualisationAttrs> = function({attrs: {
     }
 };
 
+const PokemonSvg = {
+    oncreate: function({attrs: {simulation, pokemonTypeDict, pokemon}, dom}) {
+        const nodes = nodesForTypes(pokemonTypeDict, pokemon.types);
+        const state = {
+            setActiveTransition: () => null,
+            setFirstType: () => null,
+            setSecondType: () => null,
+            setHoveredNode: () => null,
+        };
+        updateVisualisation(dom, simulation, state, nodes);
+    },
+    view: ({attrs: {pokemon}}) => [
+        m(
+            'svg',
+            {
+                width: 300,
+                height: 300,
+                version: '1',
+                xmlns: 'http://www.w3.org/2000/svg',
+            },
+        ),
+    ],
+}
+
+const PokemonVisualisation = {
+    view: ({attrs}) => m('.ma2.shadow-4.flex.items-stretch.justify-center.ba.b--near-white.bg-white.br3.pa2.open-sans', [
+        m(PokemonSvg, attrs),
+        m(
+            '.flex.flex-column.justify-around.items-end',
+            m('.small-caps.f3', attrs.pokemon.name),
+            m(Sprite, {pokemonData: attrs.pokemon, target_size: 110, state: {pokemonName: ''}}),
+            m('.small-caps.f3', attrs.pokemon.types.join(' ')),
+        )
+    ]),
+};
+
 window.addEventListener('resize', () => {
     m.redraw();
 });
 
 const simulation = forceSimulation();
-const resultPokedex = new ResultPokedex(251, true);
+const generations = {1: 151, 2: 251, 3: 386, 4: 493, 5: 649, 6:721, 7: 809, 8: 905, 9: 1025}
+const resultPokedex = new ResultPokedex(generations[3], true);
 
 const Sprite = {
-    view: ({ attrs: { pokemonData: { index, name, animated_artwork, official_artwork }, state } }) => {
-        const TARGET_SIZE = 60;
+    view: ({ attrs: { pokemonData: { index, name, animated_artwork, official_artwork}, state, target_size = 60 } }) => {
         const artwork_url = official_artwork;
         const isFocused = state.pokemonName === name;
 
@@ -239,8 +275,8 @@ const Sprite = {
                     'key': name,
                     'title': name,
                     'style': {
-                        'height': TARGET_SIZE,
-                        'width': TARGET_SIZE,
+                        'height': target_size,
+                        'width': target_size,
                         'background': `url(${artwork_url}) left 0px top 0px`,
                         'background-size': 'contain',
                         'background-repeat': 'no-repeat',
@@ -386,6 +422,16 @@ const PageWithData: m.ClosureComponent<PageWithDataAttrs> = function({attrs: {po
                 pokemonTypeDict: resultPokedex.getTypeNodes().value,
                 pokemonDataDict: resultPokedex.getPokemonData().value,
             }),
+            m('.flex.flex-wrap.items-stretch',
+              Object.values(pokemonDataDict).map(pokemon => m(
+                  PokemonVisualisation,
+                  {
+                      simulation,
+                      pokemonTypeDict: resultPokedex.getTypeNodes().value,
+                      pokemon,
+                  }
+              ))
+             ),
         ]
     };
 }
